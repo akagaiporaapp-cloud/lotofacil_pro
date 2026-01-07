@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferidor de Lotofácil</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Recharts via CDN -->
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid var(--primary);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .number-selected {
+            background-color: var(--primary) !important;
+            color: white !important;
+        }
+        
+        .number-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .card-match-11 { border-left: 4px solid #93c5fd; }
+        .card-match-12 { border-left: 4px solid #60a5fa; }
+        .card-match-13 { border-left: 4px solid #3b82f6; }
+        .card-match-14 { border-left: 4px solid #1d4ed8; }
+        .card-match-15 { border-left: 4px solid #1e40af; }
+        
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .compact-game-item {
+            min-width: 200px;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 640px) {
+            .tab-container {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .tab-item {
+                flex-shrink: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Cabeçalho -->
+        <header class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-600">Conferidor de Lotofácil</h1>
+                    <p class="text-gray-600 mt-1">Conferência completa de jogos com análises estatísticas</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <button id="configBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 transition-colors">
+                        <i class="fas fa-cog"></i>
+                        <span class="hidden sm:inline">Configurar</span>
+                    </button>
+                    
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Visualização:</span>
+                        <button id="viewToggle" class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2">
+                            <i class="fas fa-th-large"></i>
+                            <span class="hidden sm:inline">Cards</span>
+                        </button>
+                    </div>
+                    
+                    <div class="text-sm bg-blue-50 px-3 py-1.5 rounded-lg">
+                        <span class="font-medium" id="gamesCount">0</span> jogos cadastrados
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Abas principais -->
+        <div class="mb-8 border-b border-gray-200">
+            <div class="tab-container flex space-x-1 overflow-x-auto">
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors tab-active" data-tab="games">
+                    <i class="fas fa-ticket-alt mr-2"></i>Meus Jogos
+                </button>
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="check">
+                    <i class="fas fa-check-circle mr-2"></i>Conferir
+                </button>
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="stats">
+                    <i class="fas fa-chart-bar mr-2"></i>Estatísticas
+                </button>
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="finance">
+                    <i class="fas fa-coins mr-2"></i>Financeiro
+                </button>
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="simulation">
+                    <i class="fas fa-lightbulb mr-2"></i>Sugestões
+                </button>
+            </div>
+        </div>
+        
+        <!-- Conteúdo das abas -->
+        <div class="tab-content">
+            <!-- Aba: Meus Jogos -->
+            <div id="games-tab" class="tab-pane fade-in">
+                <div class="mb-6 flex flex-wrap gap-3">
+                    <button id="addGameBtn" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors">
+                        <i class="fas fa-plus"></i> Criar Novo Jogo
+                    </button>
+                    <button id="pasteGamesBtn" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors">
+                        <i class="fas fa-paste"></i> Colar Jogos em Massa
+                    </button>
+                    <button id="randomGameBtn" class="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors">
+                        <i class="fas fa-random"></i> Gerar Jogo Aleatório
+                    </button>
+                    <button id="clearAllBtn" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors ml-auto">
+                        <i class="fas fa-trash-alt"></i> Limpar Todos
+                    </button>
+                </div>
+                
+                <!-- Lista de jogos (modo cards) -->
+                <div id="gamesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Jogos serão renderizados aqui dinamicamente -->
+                    <div class="col-span-full text-center py-10 text-gray-500" id="emptyGamesMessage">
+                        <i class="fas fa-ticket-alt text-4xl mb-3"></i>
+                        <p class="text-lg">Nenhum jogo cadastrado ainda.</p>
+                        <p class="text-sm mt-2">Use os botões acima para adicionar seus jogos da Lotofácil.</p>
+                    </div>
+                </div>
+                
+                <!-- Lista de jogos (modo compacto) -->
+                <div id="gamesList" class="hidden">
+                    <div class="flex overflow-x-auto gap-3 pb-4 scrollbar-thin">
+                        <!-- Jogos serão renderizados aqui no formato compacto -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba: Conferir -->
+            <div id="check-tab" class="tab-pane hidden fade-in">
+                <div class="bg-white rounded-xl shadow p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Inserir Resultado para Conferência</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Números sorteados (1 a 25)</label>
+                        <div class="flex flex-wrap gap-2 mb-4" id="resultNumbersContainer">
+                            <!-- Números para selecionar o resultado -->
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <input type="text" id="resultInput" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            <button id="checkGamesBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                                Conferir Todos os Jogos
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Resultado Atual</h3>
+                        <div class="flex flex-wrap gap-2" id="currentResultContainer">
+                            <span class="text-gray-500">Nenhum resultado inserido ainda.</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800">Resultados da Conferência</h2>
+                    <div class="text-sm text-gray-600">
+                        <span id="totalGamesChecked">0</span> jogos conferidos
+                    </div>
+                </div>
+                
+                <div id="checkResults" class="space-y-4">
+                    <!-- Resultados da conferência serão exibidos aqui -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center text-blue-800">
+                        <i class="fas fa-info-circle text-2xl mb-3"></i>
+                        <p>Insira um resultado acima para conferir seus jogos.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba: Estatísticas -->
+            <div id="stats-tab" class="tab-pane hidden fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Frequência de Números</h2>
+                        <div class="h-80" id="frequencyChart">
+                            <!-- Gráfico de frequência será renderizado aqui -->
+                            <div class="flex items-center justify-center h-full text-gray-500">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-bar text-4xl mb-3"></i>
+                                    <p>Adicione jogos para ver estatísticas de frequência</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Distribuição de Acertos</h2>
+                        <div class="h-80" id="distributionChart">
+                            <!-- Gráfico de distribuição será renderizado aqui -->
+                            <div class="flex items-center justify-center h-full text-gray-500">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-pie text-4xl mb-3"></i>
+                                    <p>Confera jogos para ver distribuição de acertos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Números Mais e Menos Sorteados</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posição</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequência</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentual</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barra</th>
+                                </tr>
+                            </thead>
+                            <tbody id="frequencyTable" class="divide-y divide-gray-200">
+                                <!-- Tabela de frequência será preenchida aqui -->
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                        Nenhum dado disponível. Adicione jogos para ver estatísticas.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba: Financeiro -->
+            <div id="finance-tab" class="tab-pane hidden fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium">Total Investido</p>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1" id="totalInvested">R$ 0,00</h3>
+                            </div>
+                            <button id="editInvestedBtn" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i> Clique no ícone para editar
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <p class="text-gray-500 text-sm font-medium">Total Ganho</p>
+                        <h3 class="text-2xl font-bold text-green-600 mt-1" id="totalWon">R$ 0,00</h3>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <p class="text-gray-500 text-sm font-medium">Lucro/Prejuízo</p>
+                        <h3 class="text-2xl font-bold mt-1" id="profitLoss">R$ 0,00</h3>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <p class="text-gray-500 text-sm font-medium">ROI</p>
+                        <h3 class="text-2xl font-bold mt-1" id="roiPercent">0%</h3>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo por Categoria de Prêmio</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acertos</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Unitário</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prizesTable" class="divide-y divide-gray-200">
+                                <!-- Tabela de prêmios será preenchida aqui -->
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                        Nenhum prêmio registrado. Confera seus jogos para ver os resultados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba: Sugestões -->
+            <div id="simulation-tab" class="tab-pane hidden fade-in">
+                <div class="bg-white rounded-xl shadow p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Simulação: Melhorar Acertos</h2>
+                    <p class="text-gray-600 mb-6">Esta ferramenta analisa seus jogos e sugere trocas de números para potencialmente aumentar seus acertos com base em estatísticas de frequência.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Números para considerar remover</h3>
+                            <p class="text-gray-600 text-sm mb-4">Estes números aparecem com menos frequência em seus jogos:</p>
+                            <div class="flex flex-wrap gap-2" id="numbersToRemove">
+                                <!-- Números para remover serão exibidos aqui -->
+                                <span class="text-gray-500">Adicione jogos para ver sugestões</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Números para considerar adicionar</h3>
+                            <p class="text-gray-600 text-sm mb-4">Estes números são menos frequentes em seus jogos, mas são comuns nas estatísticas:</p>
+                            <div class="flex flex-wrap gap-2" id="numbersToAdd">
+                                <!-- Números para adicionar serão exibidos aqui -->
+                                <span class="text-gray-500">Adicione jogos para ver sugestões</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Sugestão de Troca</h3>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex flex-wrap items-center justify-center gap-4">
+                                <div class="text-center">
+                                    <div class="font-bold text-gray-800 mb-1">Remover</div>
+                                    <div class="flex gap-1" id="suggestedRemove">
+                                        <!-- Números sugeridos para remover -->
+                                    </div>
+                                </div>
+                                
+                                <div class="text-2xl text-gray-500">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="font-bold text-gray-800 mb-1">Adicionar</div>
+                                    <div class="flex gap-1" id="suggestedAdd">
+                                        <!-- Números sugeridos para adicionar -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button id="applySuggestionBtn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+                                    Aplicar Sugestão a um Jogo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Jogos para Otimização</h2>
+                    <p class="text-gray-600 mb-4">Estes jogos têm números com baixa frequência estatística e podem ser otimizados:</p>
+                    <div id="gamesToOptimize">
+                        <!-- Jogos que podem ser otimizados serão listados aqui -->
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="fas fa-check-circle text-2xl mb-2"></i>
+                            <p>Todos os jogos estão otimizados ou não há dados suficientes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Criar/Editar Jogo -->
+    <div id="gameModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl slide-in">
+            <div class="border-b px-6 py-4">
+                <h3 class="text-xl font-bold text-gray-800" id="modalTitle">Criar Novo Jogo</h3>
+            </div>
+            
+            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-medium mb-3">Selecione 15 números (1 a 25)</label>
+                    <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="numberSelector">
+                        <!-- Os números de 1 a 25 serão gerados aqui -->
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-sm text-gray-600" id="selectedCount">0 números selecionados</span>
+                        <button id="clearSelectionBtn" class="text-sm text-red-600 hover:text-red-800 font-medium">
+                            Limpar Seleção
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Ou cole números separados por vírgula, espaço ou quebra de linha</label>
+                    <textarea id="gameInput" rows="3" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                </div>
+                
+                <div class="flex items-center justify-between mt-2">
+                    <div class="text-sm text-gray-600">
+                        <span id="validNumbersCount">0</span> números válidos detectados
+                    </div>
+                    <div class="w-32">
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t px-6 py-4 flex justify-end gap-3">
+                <button id="cancelModalBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button id="saveGameBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                    Salvar Jogo
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Colar Jogos em Massa -->
+    <div id="pasteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col slide-in">
+            <!-- Header fixo -->
+            <div class="border-b px-6 py-4 flex-shrink-0">
+                <h3 class="text-xl font-bold text-gray-800">Colar Jogos em Massa</h3>
+                <p class="text-gray-600 text-sm mt-1">Cole vários jogos de uma vez (um por linha ou separados por vírgula)</p>
+            </div>
+            
+            <!-- Conteúdo scrollável -->
+            <div class="px-6 py-4 flex-grow overflow-y-auto scrollbar-thin">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Cole seus jogos abaixo:</label>
+                    <textarea id="bulkGamesInput" rows="10" placeholder="Exemplo:
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+2 3 5 7 11 13 17 19 21 22 23 24 25
+1-4-6-8-10-12-14-16-18-20-22-24-25-3-9" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none font-mono"></textarea>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-medium text-blue-800 mb-2">Formato aceito:</h4>
+                    <ul class="text-sm text-blue-700 list-disc pl-5 space-y-1">
+                        <li>Números separados por vírgula: <span class="font-mono">1,2,3,4,5,6,7,8,9,10,11,12,13,14,15</span></li>
+                        <li>Números separados por espaço: <span class="font-mono">1 2 3 4 5 6 7 8 9 10 11 12 13 14 15</span></li>
+                        <li>Números separados por hífen: <span class="font-mono">1-2-3-4-5-6-7-8-9-10-11-12-13-14-15</span></li>
+                        <li>Um jogo por linha (máx. 25 números por jogo)</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-medium text-gray-800 mb-3">Pré-visualização dos jogos detectados:</h4>
+                    <div id="bulkPreview" class="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto scrollbar-thin">
+                        <div class="text-gray-500 text-center py-4">Nenhum jogo detectado ainda.</div>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-600 flex justify-between">
+                        <span id="bulkValidCount">0 jogos válidos detectados</span>
+                        <span id="bulkInvalidCount" class="text-red-600">0 jogos inválidos</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer fixo com botão -->
+            <div class="border-t px-6 py-4 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <button id="cancelBulkBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                        Cancelar
+                    </button>
+                    <button id="addBulkGamesBtn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Adicionar Jogos Válidos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Configurações -->
+    <div id="configModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl slide-in">
+            <div class="border-b px-6 py-4">
+                <h3 class="text-xl font-bold text-gray-800">Configurações do Conferidor</h3>
+            </div>
+            
+            <div class="px-6 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin">
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">Configurações do Jogo</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Quantidade de números por jogo</label>
+                                <select id="configNumbersPerGame" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                                    <option value="15">15 números</option>
+                                    <option value="16">16 números</option>
+                                    <option value="17">17 números</option>
+                                    <option value="18">18 números</option>
+                                    <option value="19">19 números</option>
+                                    <option value="20">20 números</option>
+                                    <option value="21">21 números</option>
+                                    <option value="22">22 números</option>
+                                    <option value="23">23 números</option>
+                                    <option value="24">24 números</option>
+                                    <option value="25">25 números</option>
+                                </select>
+                                <p class="text-gray-600 text-xs mt-2">A Lotofácil oficial usa 15 números, mas você pode configurar conforme necessidade.</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Valor de cada jogo (R$)</label>
+                                <input type="number" id="configGameValue" min="0" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="3.00">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-6">
+                        <h4 class="font-medium text-gray-800 mb-3">Valores dos Prêmios (R$)</h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">11 acertos</label>
+                                    <input type="number" id="configPrize11" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="5.00">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">12 acertos</label>
+                                    <input type="number" id="configPrize12" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="10.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">13 acertos</label>
+                                    <input type="number" id="configPrize13" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="25.00">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">14 acertos</label>
+                                    <input type="number" id="configPrize14" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="1500.00">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-medium mb-1">15 acertos</label>
+                                    <input type="number" id="configPrize15" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="2500000.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-6">
+                        <h4 class="font-medium text-gray-800 mb-3">Outras Configurações</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="configAutoCheck" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="configAutoCheck" class="ml-2 text-gray-700 text-sm">Conferir automaticamente ao inserir resultado</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="configSoundAlert" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="configSoundAlert" class="ml-2 text-gray-700 text-sm">Tocar som ao encontrar prêmio</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="configCompactViewDefault" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="configCompactViewDefault" class="ml-2 text-gray-700 text-sm">Usar visualização compacta por padrão</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t px-6 py-4 flex justify-end gap-3">
+                <button id="resetConfigBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Redefinir Padrões
+                </button>
+                <button id="saveConfigBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                    Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Editar Investimento -->
+    <div id="editInvestedModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md slide-in">
+            <div class="border-b px-6 py-4">
+                <h3 class="text-xl font-bold text-gray-800">Editar Total Investido</h3>
+            </div>
+            
+            <div class="px-6 py-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Valor total investido (R$)</label>
+                    <input type="number" id="editInvestedInput" min="0" step="0.01" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="0.00">
+                    <p class="text-gray-600 text-xs mt-2">Este valor será somado ao cálculo automático baseado nos jogos cadastrados.</p>
+                </div>
+            </div>
+            
+            <div class="border-t px-6 py-4 flex justify-end gap-3">
+                <button id="cancelEditInvestedBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button id="saveInvestedBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script principal -->
+    <script>
+        // Configurações iniciais
+        const DEFAULT_CONFIG = {
+            numbersPerGame: 15,
+            gameValue: 3.00,
+            prizes: {
+                11: 5.00,
+                12: 10.00,
+                13: 25.00,
+                14: 1500.00,
+                15: 2500000.00
+            },
+            autoCheck: true,
+            soundAlert: false,
+            compactViewDefault: false
+        };
+
+        // Estado da aplicação
+        const state = {
+            games: [],
+            result: [],
+            config: {...DEFAULT_CONFIG},
+            viewMode: 'cards', // 'cards' ou 'compact'
+            totalInvested: 0,
+            editingGameId: null,
+            statistics: {
+                frequency: {},
+                distribution: {}
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadState();
+            initializeUI();
+            updateUI();
+            renderGames();
+            renderNumberSelectors();
+        });
+
+        // Carregar estado do Local Storage
+        function loadState() {
+            const savedGames = localStorage.getItem('lotofacil-games');
+            const savedResult = localStorage.getItem('lotofacil-result');
+            const savedConfig = localStorage.getItem('lotofacil-config');
+            const savedViewMode = localStorage.getItem('lotofacil-viewMode');
+            const savedInvested = localStorage.getItem('lotofacil-invested');
+
+            if (savedGames) {
+                state.games = JSON.parse(savedGames);
+            }
+
+            if (savedResult) {
+                state.result = JSON.parse(savedResult);
+            }
+
+            if (savedConfig) {
+                state.config = {...DEFAULT_CONFIG, ...JSON.parse(savedConfig)};
+            }
+
+            if (savedViewMode) {
+                state.viewMode = savedViewMode;
+            }
+
+            if (savedInvested) {
+                state.totalInvested = parseFloat(savedInvested);
+            }
+        }
+
+        // Salvar estado no Local Storage
+        function saveState() {
+            localStorage.setItem('lotofacil-games', JSON.stringify(state.games));
+            localStorage.setItem('lotofacil-result', JSON.stringify(state.result));
+            localStorage.setItem('lotofacil-config', JSON.stringify(state.config));
+            localStorage.setItem('lotofacil-viewMode', state.viewMode);
+            localStorage.setItem('lotofacil-invested', state.totalInvested.toString());
+        }
+
+        // Inicializar elementos da UI
+        function initializeUI() {
+            // Tabs
+            document.querySelectorAll('[data-tab]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Botões principais
+            document.getElementById('addGameBtn').addEventListener('click', () => openGameModal());
+            document.getElementById('pasteGamesBtn').addEventListener('click', () => openPasteModal());
+            document.getElementById('randomGameBtn').addEventListener('click', generateRandomGame);
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllGames);
+            document.getElementById('configBtn').addEventListener('click', () => openConfigModal());
+            document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
+            document.getElementById('checkGamesBtn').addEventListener('click', checkAllGames);
+
+            // Modal de jogo
+            document.getElementById('cancelModalBtn').addEventListener('click', () => closeGameModal());
+            document.getElementById('saveGameBtn').addEventListener('click', saveGame);
+            document.getElementById('clearSelectionBtn').addEventListener('click', clearNumberSelection);
+            document.getElementById('gameInput').addEventListener('input', validateGameInput);
+
+            // Modal de colar em massa
+            document.getElementById('cancelBulkBtn').addEventListener('click', () => closePasteModal());
+            document.getElementById('addBulkGamesBtn').addEventListener('click', addBulkGames);
+            document.getElementById('bulkGamesInput').addEventListener('input', validateBulkInput);
+
+            // Modal de configuração
+            document.getElementById('cancelConfigBtn')?.addEventListener('click', () => closeConfigModal());
+            document.getElementById('saveConfigBtn').addEventListener('click', saveConfig);
+            document.getElementById('resetConfigBtn').addEventListener('click', resetConfig);
+
+            // Modal de editar investimento
+            document.getElementById('editInvestedBtn').addEventListener('click', () => openEditInvestedModal());
+            document.getElementById('cancelEditInvestedBtn').addEventListener('click', () => closeEditInvestedModal());
+            document.getElementById('saveInvestedBtn').addEventListener('click', saveInvested);
+
+            // Aplicar sugestão
+            document.getElementById('applySuggestionBtn').addEventListener('click', applySuggestion);
+
+            // Fechar modais ao clicar fora
+            document.querySelectorAll('.modal-backdrop').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // Alternar entre abas
+        function switchTab(tabId) {
+            // Atualizar tabs ativas
+            document.querySelectorAll('[data-tab]').forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('tab-active');
+                } else {
+                    tab.classList.remove('tab-active');
+                }
+            });
+
+            // Mostrar conteúdo da tab selecionada
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+            // Atualizar estatísticas se for a tab de estatísticas
+            if (tabId === 'stats') {
+                updateStatistics();
+            }
+
+            // Atualizar financeiro se for a tab de financeiro
+            if (tabId === 'finance') {
+                updateFinance();
+            }
+
+            // Atualizar sugestões se for a tab de sugestões
+            if (tabId === 'simulation') {
+                updateSuggestions();
+            }
+        }
+
+        // Alternar modo de visualização
+        function toggleViewMode() {
+            const toggleBtn = document.getElementById('viewToggle');
+            
+            if (state.viewMode === 'cards') {
+                state.viewMode = 'compact';
+                toggleBtn.innerHTML = '<i class="fas fa-list"></i><span class="hidden sm:inline">Lista</span>';
+                document.getElementById('gamesGrid').classList.add('hidden');
+                document.getElementById('gamesList').classList.remove('hidden');
+            } else {
+                state.viewMode = 'cards';
+                toggleBtn.innerHTML = '<i class="fas fa-th-large"></i><span class="hidden sm:inline">Cards</span>';
+                document.getElementById('gamesGrid').classList.remove('hidden');
+                document.getElementById('gamesList').classList.add('hidden');
+            }
+            
+            saveState();
+            renderGames();
+        }
+
+        // Atualizar UI geral
+        function updateUI() {
+            // Atualizar contador de jogos
+            document.getElementById('gamesCount').textContent = state.games.length;
+            
+            // Mostrar/ocultar mensagem de jogos vazios
+            const emptyMsg = document.getElementById('emptyGamesMessage');
+            if (state.games.length === 0) {
+                emptyMsg.classList.remove('hidden');
+            } else {
+                emptyMsg.classList.add('hidden');
+            }
+            
+            // Atualizar visualização baseada na configuração
+            if (state.config.compactViewDefault && state.viewMode === 'cards') {
+                toggleViewMode();
+            }
+            
+            // Atualizar resultado atual
+            updateCurrentResult();
+        }
+
+        // Renderizar seletores de números
+        function renderNumberSelectors() {
+            // Seletor para criar jogos (1 a 25)
+            const numberSelector = document.getElementById('numberSelector');
+            numberSelector.innerHTML = '';
+            
+            for (let i = 1; i <= 25; i++) {
+                const numberBtn = document.createElement('button');
+                numberBtn.type = 'button';
+                numberBtn.className = 'w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors';
+                numberBtn.textContent = i;
+                numberBtn.dataset.number = i;
+                
+                numberBtn.addEventListener('click', function() {
+                    this.classList.toggle('number-selected');
+                    updateSelectedNumbers();
+                });
+                
+                numberSelector.appendChild(numberBtn);
+            }
+            
+            // Seletor para resultado (1 a 25)
+            const resultContainer = document.getElementById('resultNumbersContainer');
+            resultContainer.innerHTML = '';
+            
+            for (let i = 1; i <= 25; i++) {
+                const numberBtn = document.createElement('button');
+                numberBtn.type = 'button';
+                numberBtn.className = 'w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors';
+                numberBtn.textContent = i;
+                numberBtn.dataset.number = i;
+                
+                numberBtn.addEventListener('click', function() {
+                    const number = parseInt(this.dataset.number);
+                    const index = state.result.indexOf(number);
+                    
+                    if (index === -1) {
+                        if (state.result.length < state.config.numbersPerGame) {
+                            state.result.push(number);
+                            this.classList.add('number-selected');
+                        }
+                    } else {
+                        state.result.splice(index, 1);
+                        this.classList.remove('number-selected');
+                    }
+                    
+                    updateCurrentResult();
+                    saveState();
+                    
+                    // Conferir automaticamente se configurado
+                    if (state.config.autoCheck && state.result.length === state.config.numbersPerGame) {
+                        checkAllGames();
+                    }
+                });
+                
+                // Marcar como selecionado se estiver no resultado atual
+                if (state.result.includes(i)) {
+                    numberBtn.classList.add('number-selected');
+                }
+                
+                resultContainer.appendChild(numberBtn);
+            }
+        }
+
+        // Atualizar números selecionados no modal
+        function updateSelectedNumbers() {
+            const selected = Array.from(document.querySelectorAll('#numberSelector .number-selected'))
+                .map(btn => parseInt(btn.dataset.number))
+                .sort((a, b) => a - b);
+            
+            const selectedCount = document.getElementById('selectedCount');
+            selectedCount.textContent = `${selected.length} números selecionados`;
+            
+            // Atualizar textarea
+            const gameInput = document.getElementById('gameInput');
+            gameInput.value = selected.join(', ');
+            
+            validateGameInput();
+        }
+
+        // Limpar seleção de números
+        function clearNumberSelection() {
+            document.querySelectorAll('#numberSelector .number-selected').forEach(btn => {
+                btn.classList.remove('number-selected');
+            });
+            updateSelectedNumbers();
+        }
+
+        // Validar entrada de jogo
+        function validateGameInput() {
+            const input = document.getElementById('gameInput').value;
+            const numbers = parseNumbersFromString(input);
+            const validNumbers = numbers.filter(n => n >= 1 && n <= 25);
+            const uniqueNumbers = [...new Set(validNumbers)];
+            
+            // Atualizar contador
+            const validCount = document.getElementById('validNumbersCount');
+            const progressBar = document.getElementById('progressBar');
+            
+            validCount.textContent = uniqueNumbers.length;
+            
+            // Atualizar barra de progresso
+            const percent = Math.min(100, (uniqueNumbers.length / state.config.numbersPerGame) * 100);
+            progressBar.style.width = `${percent}%`;
+            
+            // Atualizar cor da barra
+            if (uniqueNumbers.length === state.config.numbersPerGame) {
+                progressBar.classList.remove('bg-yellow-500', 'bg-red-500');
+                progressBar.classList.add('bg-green-500');
+            } else if (uniqueNumbers.length > state.config.numbersPerGame / 2) {
+                progressBar.classList.remove('bg-green-500', 'bg-red-500');
+                progressBar.classList.add('bg-yellow-500');
+            } else {
+                progressBar.classList.remove('bg-green-500', 'bg-yellow-500');
+                progressBar.classList.add('bg-red-500');
+            }
+            
+            // Atualizar seleção visual
+            document.querySelectorAll('#numberSelector button').forEach(btn => {
+                const num = parseInt(btn.dataset.number);
+                if (uniqueNumbers.includes(num)) {
+                    btn.classList.add('number-selected');
+                } else {
+                    btn.classList.remove('number-selected');
+                }
+            });
+            
+            return uniqueNumbers;
+        }
+
+        // Validar entrada em massa
+        function validateBulkInput() {
+            const input = document.getElementById('bulkGamesInput').value;
+            const lines = input.split('\n').filter(line => line.trim() !== '');
+            const preview = document.getElementById('bulkPreview');
+            const validCount = document.getElementById('bulkValidCount');
+            const invalidCount = document.getElementById('bulkInvalidCount');
+            
+            let validGames = 0;
+            let invalidGames = 0;
+            let previewHTML = '';
+            
+            lines.forEach((line, index) => {
+                const numbers = parseNumbersFromString(line);
+                const uniqueNumbers = [...new Set(numbers)];
+                
+                // Verificar se é um jogo válido
+                const isValid = uniqueNumbers.length === state.config.numbersPerGame && 
+                               uniqueNumbers.every(n => n >= 1 && n <= 25);
+                
+                if (isValid) {
+                    validGames++;
+                    previewHTML += `
+                        <div class="mb-2 p-2 bg-green-50 border border-green-200 rounded">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-green-800">Jogo ${index + 1}:</span>
+                                <span class="text-xs text-green-600">Válido</span>
+                            </div>
+                            <div class="text-sm mt-1">${uniqueNumbers.sort((a, b) => a - b).join(', ')}</div>
+                        </div>
+                    `;
+                } else {
+                    invalidGames++;
+                    previewHTML += `
+                        <div class="mb-2 p-2 bg-red-50 border border-red-200 rounded">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-red-800">Jogo ${index + 1}:</span>
+                                <span class="text-xs text-red-600">Inválido</span>
+                            </div>
+                            <div class="text-sm mt-1">${line || '(vazio)'}</div>
+                            <div class="text-xs text-red-600 mt-1">
+                                ${uniqueNumbers.length} números únicos detectados (esperado: ${state.config.numbersPerGame})
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            validCount.textContent = `${validGames} jogos válidos detectados`;
+            invalidCount.textContent = `${invalidGames} jogos inválidos`;
+            
+            if (lines.length === 0) {
+                preview.innerHTML = '<div class="text-gray-500 text-center py-4">Nenhum jogo detectado ainda.</div>';
+            } else {
+                preview.innerHTML = previewHTML;
+            }
+        }
+
+        // Analisar números de uma string
+        function parseNumbersFromString(str) {
+            // Substituir diferentes separadores por vírgula
+            const normalized = str.replace(/[,\s\-;|]+/g, ',').replace(/,+/g, ',');
+            
+            // Dividir por vírgula e converter para números
+            return normalized.split(',')
+                .map(num => parseInt(num.trim()))
+                .filter(num => !isNaN(num));
+        }
+
+        // Abrir modal de jogo
+        function openGameModal(gameId = null) {
+            const modal = document.getElementById('gameModal');
+            const title = document.getElementById('modalTitle');
+            const gameInput = document.getElementById('gameInput');
+            
+            if (gameId !== null) {
+                // Modo edição
+                state.editingGameId = gameId;
+                const game = state.games.find(g => g.id === gameId);
+                title.textContent = 'Editar Jogo';
+                gameInput.value = game.numbers.sort((a, b) => a - b).join(', ');
+            } else {
+                // Modo criação
+                state.editingGameId = null;
+                title.textContent = 'Criar Novo Jogo';
+                gameInput.value = '';
+            }
+            
+            // Limpar seleção visual
+            clearNumberSelection();
+            
+            // Validar entrada inicial
+            validateGameInput();
+            
+            // Mostrar modal
+            modal.classList.remove('hidden');
+        }
+
+        // Fechar modal de jogo
+        function closeGameModal() {
+            document.getElementById('gameModal').classList.add('hidden');
+        }
+
+        // Salvar jogo
+        function saveGame() {
+            const numbers = validateGameInput();
+            
+            // Verificar se temos a quantidade correta de números
+            if (numbers.length !== state.config.numbersPerGame) {
+                alert(`Por favor, selecione exatamente ${state.config.numbersPerGame} números.`);
+                return;
+            }
+            
+            // Verificar se todos os números estão no intervalo válido
+            if (!numbers.every(n => n >= 1 && n <= 25)) {
+                alert('Por favor, selecione apenas números entre 1 e 25.');
+                return;
+            }
+            
+            if (state.editingGameId !== null) {
+                // Atualizar jogo existente
+                const gameIndex = state.games.findIndex(g => g.id === state.editingGameId);
+                if (gameIndex !== -1) {
+                    state.games[gameIndex].numbers = numbers;
+                }
+            } else {
+                // Criar novo jogo
+                const newGame = {
+                    id: Date.now(),
+                    numbers: numbers,
+                    checked: false,
+                    matches: 0,
+                    prize: 0
+                };
+                state.games.push(newGame);
+            }
+            
+            // Fechar modal e atualizar
+            closeGameModal();
+            saveState();
+            renderGames();
+            updateUI();
+            
+            // Se houver resultado, conferir o jogo
+            if (state.result.length === state.config.numbersPerGame) {
+                checkAllGames();
+            }
+        }
+
+        // Gerar jogo aleatório
+        function generateRandomGame() {
+            const numbers = [];
+            const allNumbers = Array.from({length: 25}, (_, i) => i + 1);
+            
+            // Embaralhar números
+            for (let i = allNumbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allNumbers[i], allNumbers[j]] = [allNumbers[j], allNumbers[i]];
+            }
+            
+            // Pegar os primeiros N números
+            for (let i = 0; i < state.config.numbersPerGame; i++) {
+                numbers.push(allNumbers[i]);
+            }
+            
+            // Ordenar
+            numbers.sort((a, b) => a - b);
+            
+            // Criar jogo
+            const newGame = {
+                id: Date.now(),
+                numbers: numbers,
+                checked: false,
+                matches: 0,
+                prize: 0
+            };
+            
+            state.games.push(newGame);
+            saveState();
+            renderGames();
+            updateUI();
+            
+            // Se houver resultado, conferir o jogo
+            if (state.result.length === state.config.numbersPerGame) {
+                checkAllGames();
+            }
+        }
+
+        // Abrir modal de colar em massa
+        function openPasteModal() {
+            const modal = document.getElementById('pasteModal');
+            modal.classList.remove('hidden');
+            
+            // Limpar e focar no textarea
+            const bulkInput = document.getElementById('bulkGamesInput');
+            bulkInput.value = '';
+            bulkInput.focus();
+            
+            // Limpar pré-visualização
+            document.getElementById('bulkPreview').innerHTML = '<div class="text-gray-500 text-center py-4">Nenhum jogo detectado ainda.</div>';
+            document.getElementById('bulkValidCount').textContent = '0 jogos válidos detectados';
+            document.getElementById('bulkInvalidCount').textContent = '0 jogos inválidos';
+        }
+
+        // Fechar modal de colar em massa
+        function closePasteModal() {
+            document.getElementById('pasteModal').classList.add('hidden');
+        }
+
+        // Adicionar jogos em massa
+        function addBulkGames() {
+            const input = document.getElementById('bulkGamesInput').value;
+            const lines = input.split('\n').filter(line => line.trim() !== '');
+            
+            let addedCount = 0;
+            
+            lines.forEach(line => {
+                const numbers = parseNumbersFromString(line);
+                const uniqueNumbers = [...new Set(numbers)];
+                
+                // Verificar se é um jogo válido
+                const isValid = uniqueNumbers.length === state.config.numbersPerGame && 
+                               uniqueNumbers.every(n => n >= 1 && n <= 25);
+                
+                if (isValid) {
+                    // Criar jogo
+                    const newGame = {
+                        id: Date.now() + Math.random(),
+                        numbers: uniqueNumbers.sort((a, b) => a - b),
+                        checked: false,
+                        matches: 0,
+                        prize: 0
+                    };
+                    
+                    state.games.push(newGame);
+                    addedCount++;
+                }
+            });
+            
+            if (addedCount > 0) {
+                saveState();
+                renderGames();
+                updateUI();
+                
+                // Se houver resultado, conferir os jogos
+                if (state.result.length === state.config.numbersPerGame) {
+                    checkAllGames();
+                }
+                
+                alert(`${addedCount} jogos adicionados com sucesso!`);
+                closePasteModal();
+            } else {
+                alert('Nenhum jogo válido foi detectado. Verifique o formato e tente novamente.');
+            }
+        }
+
+        // Renderizar jogos
+        function renderGames() {
+            const gamesGrid = document.getElementById('gamesGrid');
+            const gamesList = document.getElementById('gamesList');
+            
+            // Limpar containers
+            gamesGrid.innerHTML = '';
+            gamesList.innerHTML = '';
+            
+            if (state.games.length === 0) {
+                gamesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-10 text-gray-500">
+                        <i class="fas fa-ticket-alt text-4xl mb-3"></i>
+                        <p class="text-lg">Nenhum jogo cadastrado ainda.</p>
+                        <p class="text-sm mt-2">Use os botões acima para adicionar seus jogos da Lotofácil.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Renderizar no modo cards
+            state.games.forEach(game => {
+                const matchClass = game.checked ? `card-match-${game.matches}` : '';
+                
+                const gameCard = document.createElement('div');
+                gameCard.className = `bg-white rounded-xl shadow border border-gray-200 overflow-hidden ${matchClass}`;
+                gameCard.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Jogo #${game.id.toString().slice(-4)}</h4>
+                                ${game.checked ? `
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${game.matches >= 11 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                            ${game.matches} acertos
+                                        </span>
+                                        ${game.prize > 0 ? `
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-1">
+                                                R$ ${game.prize.toFixed(2)}
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="edit-game-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-id="${game.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-game-btn p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" data-id="${game.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1.5 mb-4">
+                            ${game.numbers.map(num => `
+                                <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
+                                    ${num}
+                                </span>
+                            `).join('')}
+                        </div>
+                        
+                        ${game.checked ? `
+                            <div class="text-sm text-gray-600">
+                                ${game.matches >= 11 ? 
+                                    `<span class="font-medium text-green-600">Parabéns! Você acertou ${game.matches} números.</span>` : 
+                                    `<span>Você acertou ${game.matches} números.</span>`
+                                }
+                            </div>
+                        ` : `
+                            <div class="text-sm text-gray-500">Aguardando conferência</div>
+                        `}
+                    </div>
+                `;
+                
+                gamesGrid.appendChild(gameCard);
+                
+                // Renderizar no modo lista (compacto)
+                const compactGame = document.createElement('div');
+                compactGame.className = 'compact-game-item bg-white rounded-lg shadow border border-gray-200 p-4';
+                compactGame.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="font-medium text-sm">Jogo #${game.id.toString().slice(-4)}</div>
+                        <div class="flex gap-1">
+                            <button class="edit-game-btn p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" data-id="${game.id}">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                            <button class="delete-game-btn p-1 text-red-600 hover:bg-red-50 rounded transition-colors" data-id="${game.id}">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        ${game.numbers.map(num => `
+                            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
+                                ${num}
+                            </span>
+                        `).join('')}
+                    </div>
+                    ${game.checked ? `
+                        <div class="mt-2 text-xs">
+                            <span class="font-medium ${game.matches >= 11 ? 'text-green-600' : 'text-gray-600'}">
+                                ${game.matches} acertos
+                            </span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                gamesList.appendChild(compactGame);
+            });
+            
+            // Adicionar event listeners para os botões de editar/excluir
+            document.querySelectorAll('.edit-game-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gameId = parseInt(this.getAttribute('data-id'));
+                    openGameModal(gameId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-game-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gameId = parseInt(this.getAttribute('data-id'));
+                    deleteGame(gameId);
+                });
+            });
+        }
+
+        // Excluir jogo
+        function deleteGame(gameId) {
+            if (confirm('Tem certeza que deseja excluir este jogo?')) {
+                state.games = state.games.filter(game => game.id !== gameId);
+                saveState();
+                renderGames();
+                updateUI();
+                updateFinance();
+            }
+        }
+
+        // Limpar todos os jogos
+        function clearAllGames() {
+            if (state.games.length === 0) {
+                alert('Não há jogos para limpar.');
+                return;
+            }
+            
+            if (confirm(`Tem certeza que deseja excluir todos os ${state.games.length} jogos? Esta ação não pode ser desfeita.`)) {
+                state.games = [];
+                saveState();
+                renderGames();
+                updateUI();
+                updateFinance();
+            }
+        }
+
+        // Atualizar resultado atual
+        function updateCurrentResult() {
+            const container = document.getElementById('currentResultContainer');
+            
+            if (state.result.length === 0) {
+                container.innerHTML = '<span class="text-gray-500">Nenhum resultado inserido ainda.</span>';
+                return;
+            }
+            
+            const sortedResult = [...state.result].sort((a, b) => a - b);
+            container.innerHTML = sortedResult.map(num => `
+                <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                    ${num}
+                </span>
+            `).join('');
+        }
+
+        // Conferir todos os jogos
+        function checkAllGames() {
+            // Verificar se temos resultado completo
+            if (state.result.length !== state.config.numbersPerGame) {
+                alert(`Por favor, insira um resultado completo com ${state.config.numbersPerGame} números.`);
+                return;
+            }
+            
+            // Conferir cada jogo
+            state.games.forEach(game => {
+                const matches = game.numbers.filter(num => state.result.includes(num)).length;
+                game.matches = matches;
+                game.prize = state.config.prizes[matches] || 0;
+                game.checked = true;
+            });
+            
+            saveState();
+            renderGames();
+            updateStatistics();
+            updateFinance();
+            
+            // Atualizar contador de jogos conferidos
+            document.getElementById('totalGamesChecked').textContent = state.games.length;
+            
+            // Mostrar resultados da conferência
+            showCheckResults();
+            
+            // Tocar som se configurado e houver prêmio
+            if (state.config.soundAlert && state.games.some(g => g.prize > 0)) {
+                playPrizeSound();
+            }
+        }
+
+        // Mostrar resultados da conferência
+        function showCheckResults() {
+            const container = document.getElementById('checkResults');
+            
+            // Agrupar por quantidade de acertos
+            const groups = {};
+            state.games.forEach(game => {
+                if (!groups[game.matches]) {
+                    groups[game.matches] = [];
+                }
+                groups[game.matches].push(game);
+            });
+            
+            // Ordenar por acertos (decrescente)
+            const sortedGroups = Object.keys(groups).sort((a, b) => b - a);
+            
+            if (sortedGroups.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center text-blue-800">
+                        <i class="fas fa-info-circle text-2xl mb-3"></i>
+                        <p>Insira um resultado acima para conferir seus jogos.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let resultsHTML = '';
+            
+            sortedGroups.forEach(matchCount => {
+                const games = groups[matchCount];
+                const matchNum = parseInt(matchCount);
+                const totalPrize = games.reduce((sum, game) => sum + game.prize, 0);
+                
+                // Definir cor baseada na quantidade de acertos
+                let bgColor = 'bg-gray-50';
+                let borderColor = 'border-gray-200';
+                let textColor = 'text-gray-800';
+                
+                if (matchNum >= 15) {
+                    bgColor = 'bg-green-50';
+                    borderColor = 'border-green-200';
+                    textColor = 'text-green-800';
+                } else if (matchNum >= 13) {
+                    bgColor = 'bg-blue-50';
+                    borderColor = 'border-blue-200';
+                    textColor = 'text-blue-800';
+                } else if (matchNum >= 11) {
+                    bgColor = 'bg-yellow-50';
+                    borderColor = 'border-yellow-200';
+                    textColor = 'text-yellow-800';
+                }
+                
+                resultsHTML += `
+                    <div class="${bgColor} border ${borderColor} rounded-xl p-5">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold ${textColor}">
+                                    ${matchNum} acertos
+                                    <span class="ml-2 text-sm font-normal">(${games.length} jogo${games.length > 1 ? 's' : ''})</span>
+                                </h3>
+                                <p class="text-sm ${textColor.replace('800', '600')} mt-1">
+                                    Prêmio: R$ ${state.config.prizes[matchNum] ? state.config.prizes[matchNum].toFixed(2) : '0,00'} por jogo
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold ${textColor}">R$ ${totalPrize.toFixed(2)}</div>
+                                <div class="text-sm ${textColor.replace('800', '600')}">Total</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            ${games.map(game => `
+                                <div class="bg-white rounded-lg p-3 border ${borderColor.replace('200', '100')}">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <div class="font-medium text-sm">Jogo #${game.id.toString().slice(-4)}</div>
+                                        <div class="text-sm font-bold ${game.prize > 0 ? 'text-green-600' : 'text-gray-600'}">
+                                            R$ ${game.prize.toFixed(2)}
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${game.numbers.map(num => `
+                                            <span class="w-6 h-6 rounded-full ${state.result.includes(num) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} flex items-center justify-center text-xs font-medium">
+                                                ${num}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = resultsHTML;
+        }
+
+        // Tocar som de prêmio
+        function playPrizeSound() {
+            // Criar um som simples usando Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 880;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (e) {
+                console.log('Não foi possível reproduzir som:', e);
+            }
+        }
+
+        // Atualizar estatísticas
+        function updateStatistics() {
+            // Calcular frequência de números
+            const frequency = {};
+            for (let i = 1; i <= 25; i++) {
+                frequency[i] = 0;
+            }
+            
+            state.games.forEach(game => {
+                game.numbers.forEach(num => {
+                    frequency[num]++;
+                });
+            });
+            
+            state.statistics.frequency = frequency;
+            
+            // Calcular distribuição de acertos
+            const distribution = {};
+            state.games.forEach(game => {
+                if (game.checked) {
+                    if (!distribution[game.matches]) {
+                        distribution[game.matches] = 0;
+                    }
+                    distribution[game.matches]++;
+                }
+            });
+            
+            state.statistics.distribution = distribution;
+            
+            // Atualizar tabela de frequência
+            updateFrequencyTable();
+            
+            // Atualizar gráficos (simulação)
+            updateCharts();
+        }
+
+        // Atualizar tabela de frequência
+        function updateFrequencyTable() {
+            const table = document.getElementById('frequencyTable');
+            
+            if (state.games.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            Nenhum dado disponível. Adicione jogos para ver estatísticas.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Converter objeto em array e ordenar por frequência (decrescente)
+            const freqArray = Object.entries(state.statistics.frequency)
+                .map(([num, count]) => ({num: parseInt(num), count}))
+                .sort((a, b) => b.count - a.count);
+            
+            let tableHTML = '';
+            
+            freqArray.forEach((item, index) => {
+                const percentage = state.games.length > 0 ? 
+                    ((item.count / (state.games.length * state.config.numbersPerGame)) * 100).toFixed(1) : 0;
+                
+                // Cor baseada na posição
+                let rowColor = '';
+                if (index < 5) {
+                    rowColor = 'bg-green-50';
+                } else if (index >= 20) {
+                    rowColor = 'bg-red-50';
+                }
+                
+                tableHTML += `
+                    <tr class="${rowColor}">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}º</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-medium">
+                                ${item.num}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${item.count}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            table.innerHTML = tableHTML;
+        }
+
+        // Atualizar gráficos (simulação)
+        function updateCharts() {
+            // Simulação de gráfico de frequência
+            const freqChart = document.getElementById('frequencyChart');
+            const distChart = document.getElementById('distributionChart');
+            
+            if (state.games.length === 0) {
+                freqChart.innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-chart-bar text-4xl mb-3"></i>
+                            <p>Adicione jogos para ver estatísticas de frequência</p>
+                        </div>
+                    </div>
+                `;
+                
+                distChart.innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-chart-pie text-4xl mb-3"></i>
+                            <p>Confera jogos para ver distribuição de acertos</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Gráfico de frequência (simulado com HTML/CSS)
+            let freqHTML = '<div class="flex flex-col h-full">';
+            freqHTML += '<div class="flex-1 flex items-end space-x-1 pb-4">';
+            
+            // Converter objeto em array e ordenar por número
+            const freqArray = Object.entries(state.statistics.frequency)
+                .map(([num, count]) => ({num: parseInt(num), count}))
+                .sort((a, b) => a.num - b.num);
+            
+            const maxFreq = Math.max(...freqArray.map(item => item.count));
+            
+            freqArray.forEach(item => {
+                const height = maxFreq > 0 ? (item.count / maxFreq) * 80 : 0;
+                freqHTML += `
+                    <div class="flex-1 flex flex-col items-center">
+                        <div class="w-full bg-blue-500 rounded-t" style="height: ${height}%"></div>
+                        <div class="text-xs mt-1 font-medium">${item.num}</div>
+                    </div>
+                `;
+            });
+            
+            freqHTML += '</div>';
+            freqHTML += '<div class="text-center text-sm text-gray-600">Números (1 a 25)</div>';
+            freqHTML += '</div>';
+            
+            freqChart.innerHTML = freqHTML;
+            
+            // Gráfico de distribuição (simulado com HTML/CSS)
+            if (Object.keys(state.statistics.distribution).length === 0) {
+                distChart.innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-chart-pie text-4xl mb-3"></i>
+                            <p>Confera jogos para ver distribuição de acertos</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Calcular totais para o gráfico de pizza
+            const distArray = Object.entries(state.statistics.distribution)
+                .map(([matches, count]) => ({matches: parseInt(matches), count}))
+                .sort((a, b) => b.matches - a.matches);
+            
+            const totalChecked = state.games.filter(g => g.checked).length;
+            
+            let distHTML = '<div class="flex flex-col items-center justify-center h-full">';
+            
+            // Simular gráfico de pizza com divs circulares
+            distHTML += '<div class="relative w-48 h-48 rounded-full mb-4">';
+            
+            let cumulativeAngle = 0;
+            const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#eff6ff'];
+            
+            distArray.forEach((item, index) => {
+                const percentage = (item.count / totalChecked) * 100;
+                const angle = (percentage / 100) * 360;
+                
+                distHTML += `
+                    <div class="absolute inset-0 overflow-hidden">
+                        <div class="absolute inset-0" style="
+                            background: conic-gradient(
+                                transparent 0deg ${cumulativeAngle}deg,
+                                ${colors[index % colors.length]} ${cumulativeAngle}deg ${cumulativeAngle + angle}deg,
+                                transparent ${cumulativeAngle + angle}deg 360deg
+                            );
+                        "></div>
+                    </div>
+                `;
+                
+                cumulativeAngle += angle;
+            });
+            
+            distHTML += '<div class="absolute inset-8 bg-white rounded-full"></div>';
+            distHTML += '</div>';
+            
+            // Legenda
+            distHTML += '<div class="grid grid-cols-2 gap-2">';
+            distArray.forEach((item, index) => {
+                const percentage = totalChecked > 0 ? ((item.count / totalChecked) * 100).toFixed(1) : 0;
+                distHTML += `
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${colors[index % colors.length]}"></div>
+                        <div class="text-sm">
+                            <span class="font-medium">${item.matches} acertos:</span>
+                            <span class="text-gray-600 ml-1">${item.count} (${percentage}%)</span>
+                        </div>
+                    </div>
+                `;
+            });
+            distHTML += '</div>';
+            distHTML += '</div>';
+            
+            distChart.innerHTML = distHTML;
+        }
+
+        // Abrir modal de configuração
+        function openConfigModal() {
+            const modal = document.getElementById('configModal');
+            
+            // Preencher valores atuais
+            document.getElementById('configNumbersPerGame').value = state.config.numbersPerGame;
+            document.getElementById('configGameValue').value = state.config.gameValue.toFixed(2);
+            document.getElementById('configPrize11').value = state.config.prizes[11].toFixed(2);
+            document.getElementById('configPrize12').value = state.config.prizes[12].toFixed(2);
+            document.getElementById('configPrize13').value = state.config.prizes[13].toFixed(2);
+            document.getElementById('configPrize14').value = state.config.prizes[14].toFixed(2);
+            document.getElementById('configPrize15').value = state.config.prizes[15].toFixed(2);
+            document.getElementById('configAutoCheck').checked = state.config.autoCheck;
+            document.getElementById('configSoundAlert').checked = state.config.soundAlert;
+            document.getElementById('configCompactViewDefault').checked = state.config.compactViewDefault;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Fechar modal de configuração
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.add('hidden');
+        }
+
+        // Salvar configuração
+        function saveConfig() {
+            // Obter valores do formulário
+            const numbersPerGame = parseInt(document.getElementById('configNumbersPerGame').value);
+            const gameValue = parseFloat(document.getElementById('configGameValue').value);
+            
+            // Validar números por jogo
+            if (numbersPerGame < 15 || numbersPerGame > 25) {
+                alert('A quantidade de números por jogo deve estar entre 15 e 25.');
+                return;
+            }
+            
+            // Atualizar configuração
+            state.config.numbersPerGame = numbersPerGame;
+            state.config.gameValue = gameValue;
+            state.config.prizes[11] = parseFloat(document.getElementById('configPrize11').value);
+            state.config.prizes[12] = parseFloat(document.getElementById('configPrize12').value);
+            state.config.prizes[13] = parseFloat(document.getElementById('configPrize13').value);
+            state.config.prizes[14] = parseFloat(document.getElementById('configPrize14').value);
+            state.config.prizes[15] = parseFloat(document.getElementById('configPrize15').value);
+            state.config.autoCheck = document.getElementById('configAutoCheck').checked;
+            state.config.soundAlert = document.getElementById('configSoundAlert').checked;
+            state.config.compactViewDefault = document.getElementById('configCompactViewDefault').checked;
+            
+            // Limpar resultado atual se a quantidade de números mudou
+            if (state.result.length !== numbersPerGame) {
+                state.result = [];
+                updateCurrentResult();
+                renderNumberSelectors();
+            }
+            
+            saveState();
+            closeConfigModal();
+            
+            // Recriar seletores de números com nova configuração
+            renderNumberSelectors();
+            
+            // Atualizar interface
+            updateUI();
+            
+            alert('Configurações salvas com sucesso!');
+        }
+
+        // Redefinir configuração padrão
+        function resetConfig() {
+            if (confirm('Tem certeza que deseja redefinir todas as configurações para os valores padrão?')) {
+                state.config = {...DEFAULT_CONFIG};
+                saveState();
+                openConfigModal(); // Reabrir modal para mostrar valores padrão
+                alert('Configurações redefinidas para os valores padrão.');
+            }
+        }
+
+        // Atualizar informações financeiras
+        function updateFinance() {
+            // Calcular totais
+            const totalGames = state.games.length;
+            const totalInvestedAuto = totalGames * state.config.gameValue;
+            const totalInvested = totalInvestedAuto + state.totalInvested;
+            const totalWon = state.games.reduce((sum, game) => sum + game.prize, 0);
+            const profitLoss = totalWon - totalInvested;
+            const roiPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : 0;
+            
+            // Atualizar UI
+            document.getElementById('totalInvested').textContent = `R$ ${totalInvested.toFixed(2)}`;
+            document.getElementById('totalWon').textContent = `R$ ${totalWon.toFixed(2)}`;
+            document.getElementById('profitLoss').textContent = `R$ ${profitLoss.toFixed(2)}`;
+            document.getElementById('roiPercent').textContent = `${roiPercent}%`;
+            
+            // Cor do lucro/prejuízo
+            const profitElement = document.getElementById('profitLoss');
+            if (profitLoss > 0) {
+                profitElement.classList.remove('text-red-600', 'text-yellow-600');
+                profitElement.classList.add('text-green-600');
+            } else if (profitLoss < 0) {
+                profitElement.classList.remove('text-green-600', 'text-yellow-600');
+                profitElement.classList.add('text-red-600');
+            } else {
+                profitElement.classList.remove('text-green-600', 'text-red-600');
+                profitElement.classList.add('text-yellow-600');
+            }
+            
+            // Atualizar tabela de prêmios
+            updatePrizesTable();
+        }
+
+        // Atualizar tabela de prêmios
+        function updatePrizesTable() {
+            const table = document.getElementById('prizesTable');
+            
+            // Agrupar jogos por quantidade de acertos
+            const prizesByMatch = {};
+            for (let i = 11; i <= 15; i++) {
+                prizesByMatch[i] = {
+                    count: 0,
+                    total: 0
+                };
+            }
+            
+            state.games.forEach(game => {
+                if (game.checked && game.matches >= 11) {
+                    prizesByMatch[game.matches].count++;
+                    prizesByMatch[game.matches].total += game.prize;
+                }
+            });
+            
+            let tableHTML = '';
+            
+            for (let i = 15; i >= 11; i--) {
+                const data = prizesByMatch[i];
+                tableHTML += `
+                    <tr>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${i} acertos
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                            ${data.count}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                            R$ ${state.config.prizes[i] ? state.config.prizes[i].toFixed(2) : '0,00'}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${data.total > 0 ? 'text-green-600' : 'text-gray-900'}">
+                            R$ ${data.total.toFixed(2)}
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            if (tableHTML === '') {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                            Nenhum prêmio registrado. Confera seus jogos para ver os resultados.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                table.innerHTML = tableHTML;
+            }
+        }
+
+        // Abrir modal de editar investimento
+        function openEditInvestedModal() {
+            const modal = document.getElementById('editInvestedModal');
+            document.getElementById('editInvestedInput').value = state.totalInvested.toFixed(2);
+            modal.classList.remove('hidden');
+        }
+
+        // Fechar modal de editar investimento
+        function closeEditInvestedModal() {
+            document.getElementById('editInvestedModal').classList.add('hidden');
+        }
+
+        // Salvar investimento
+        function saveInvested() {
+            const value = parseFloat(document.getElementById('editInvestedInput').value);
+            
+            if (isNaN(value) || value < 0) {
+                alert('Por favor, insira um valor válido (maior ou igual a zero).');
+                return;
+            }
+            
+            state.totalInvested = value;
+            saveState();
+            updateFinance();
+            closeEditInvestedModal();
+            
+            alert('Valor investido atualizado com sucesso!');
+        }
+
+        // Atualizar sugestões
+        function updateSuggestions() {
+            // Calcular frequência global (todos os números de 1 a 25)
+            const globalFrequency = {};
+            for (let i = 1; i <= 25; i++) {
+                globalFrequency[i] = 0;
+            }
+            
+            state.games.forEach(game => {
+                game.numbers.forEach(num => {
+                    globalFrequency[num]++;
+                });
+            });
+            
+            // Converter para array e ordenar
+            const freqArray = Object.entries(globalFrequency)
+                .map(([num, count]) => ({num: parseInt(num), count}))
+                .sort((a, b) => a.count - b.count); // Ordenar por menor frequência primeiro
+            
+            // Números menos frequentes (para considerar remover)
+            const leastFrequent = freqArray.slice(0, 5).map(item => item.num);
+            
+            // Números mais frequentes (para considerar adicionar)
+            // Primeiro, pegar números que não estão entre os menos frequentes
+            const mostFrequentCandidates = freqArray
+                .filter(item => !leastFrequent.includes(item.num))
+                .slice(-5)
+                .map(item => item.num);
+            
+            // Atualizar UI
+            updateSuggestionUI(leastFrequent, mostFrequentCandidates);
+            
+            // Identificar jogos para otimização
+            identifyGamesToOptimize(leastFrequent);
+        }
+
+        // Atualizar UI de sugestões
+        function updateSuggestionUI(toRemove, toAdd) {
+            // Números para remover
+            const removeContainer = document.getElementById('numbersToRemove');
+            if (toRemove.length === 0) {
+                removeContainer.innerHTML = '<span class="text-gray-500">Adicione jogos para ver sugestões</span>';
+            } else {
+                removeContainer.innerHTML = toRemove.map(num => `
+                    <span class="w-10 h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium">
+                        ${num}
+                    </span>
+                `).join('');
+            }
+            
+            // Números para adicionar
+            const addContainer = document.getElementById('numbersToAdd');
+            if (toAdd.length === 0) {
+                addContainer.innerHTML = '<span class="text-gray-500">Adicione jogos para ver sugestões</span>';
+            } else {
+                addContainer.innerHTML = toAdd.map(num => `
+                    <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                        ${num}
+                    </span>
+                `).join('');
+            }
+            
+            // Sugestão de troca
+            const suggestedRemove = document.getElementById('suggestedRemove');
+            const suggestedAdd = document.getElementById('suggestedAdd');
+            
+            if (toRemove.length >= 2 && toAdd.length >= 2) {
+                // Sugerir trocar 2 números
+                suggestedRemove.innerHTML = toRemove.slice(0, 2).map(num => `
+                    <span class="w-10 h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium">
+                        ${num}
+                    </span>
+                `).join('');
+                
+                suggestedAdd.innerHTML = toAdd.slice(0, 2).map(num => `
+                    <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                        ${num}
+                    </span>
+                `).join('');
+            } else {
+                suggestedRemove.innerHTML = '<span class="text-gray-500">-</span>';
+                suggestedAdd.innerHTML = '<span class="text-gray-500">-</span>';
+            }
+        }
+
+        // Identificar jogos para otimização
+        function identifyGamesToOptimize(leastFrequent) {
+            const container = document.getElementById('gamesToOptimize');
+            
+            if (state.games.length === 0 || leastFrequent.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-check-circle text-2xl mb-2"></i>
+                        <p>Todos os jogos estão otimizados ou não há dados suficientes.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Encontrar jogos que contêm muitos números pouco frequentes
+            const gamesToOptimize = state.games.map(game => {
+                const lowFreqCount = game.numbers.filter(num => leastFrequent.includes(num)).length;
+                return {
+                    game,
+                    lowFreqCount,
+                    score: lowFreqCount / game.numbers.length
+                };
+            }).filter(item => item.lowFreqCount >= 2) // Pelo menos 2 números pouco frequentes
+              .sort((a, b) => b.score - a.score) // Ordenar por maior score primeiro
+              .slice(0, 5); // Limitar a 5 jogos
+            
+            if (gamesToOptimize.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-check-circle text-2xl mb-2"></i>
+                        <p>Todos os jogos estão otimizados ou não há dados suficientes.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let gamesHTML = '<div class="space-y-4">';
+            
+            gamesToOptimize.forEach(item => {
+                const { game, lowFreqCount } = item;
+                
+                gamesHTML += `
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="font-medium">Jogo #${game.id.toString().slice(-4)}</div>
+                            <div class="text-sm text-red-600 font-medium">
+                                ${lowFreqCount} números pouco frequentes
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            ${game.numbers.map(num => `
+                                <span class="w-8 h-8 rounded-full ${leastFrequent.includes(num) ? 'bg-red-100 text-red-800 border-2 border-red-300' : 'bg-blue-100 text-blue-800'} flex items-center justify-center text-sm font-medium">
+                                    ${num}
+                                </span>
+                            `).join('')}
+                        </div>
+                        
+                        <button class="optimize-game-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors w-full" data-id="${game.id}">
+                            Otimizar Este Jogo
+                        </button>
+                    </div>
+                `;
+            });
+            
+            gamesHTML += '</div>';
+            container.innerHTML = gamesHTML;
+            
+            // Adicionar event listeners para os botões de otimização
+            document.querySelectorAll('.optimize-game-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gameId = parseInt(this.getAttribute('data-id'));
+                    openGameModal(gameId);
+                });
+            });
+        }
+
+        // Aplicar sugestão a um jogo
+        function applySuggestion() {
+            // Verificar se há jogos
+            if (state.games.length === 0) {
+                alert('Não há jogos para aplicar sugestões. Adicione alguns jogos primeiro.');
+                return;
+            }
+            
+            // Encontrar um jogo para otimizar
+            const gameToOptimize = state.games.find(game => {
+                // Jogo que ainda não foi conferido ou com poucos acertos
+                return !game.checked || game.matches < 11;
+            });
+            
+            if (!gameToOptimize) {
+                alert('Todos os jogos já estão otimizados ou têm bons resultados. Tente adicionar mais jogos.');
+                return;
+            }
+            
+            // Abrir modal de edição para este jogo
+            openGameModal(gameToOptimize.id);
+        }
+    </script>
+</body>
+</html>
