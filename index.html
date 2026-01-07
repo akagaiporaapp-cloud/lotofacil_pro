@@ -2,12 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Conferidor de Lotofácil</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Recharts via CDN -->
-    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
     <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,11 +26,6 @@
         .number-selected {
             background-color: var(--primary) !important;
             color: white !important;
-        }
-        
-        .number-disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         
         .card-match-11 { border-left: 4px solid #93c5fd; }
@@ -95,7 +88,61 @@
             flex-shrink: 0;
         }
         
+        /* Menu hamburguer para mobile */
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        /* Ajustes para mobile */
         @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .number-grid {
+                grid-template-columns: repeat(5, 1fr) !important;
+                gap: 0.4rem !important;
+            }
+            
+            .number-btn {
+                width: 2.5rem !important;
+                height: 2.5rem !important;
+                font-size: 0.875rem !important;
+            }
+            
+            .game-card {
+                padding: 1rem !important;
+            }
+            
+            .mobile-tab {
+                font-size: 0.75rem;
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .mobile-text-sm {
+                font-size: 0.875rem;
+            }
+            
+            .mobile-text-xs {
+                font-size: 0.75rem;
+            }
+            
+            .mobile-p-3 {
+                padding: 0.75rem;
+            }
+            
+            .mobile-p-4 {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
             .tab-container {
                 overflow-x: auto;
                 flex-wrap: nowrap;
@@ -103,49 +150,159 @@
             
             .tab-item {
                 flex-shrink: 0;
+                white-space: nowrap;
             }
+            
+            .mobile-col {
+                flex-direction: column;
+            }
+            
+            .mobile-full {
+                width: 100%;
+            }
+        }
+        
+        /* Melhorias para touch */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        .btn-touch {
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+        
+        /* Estilos para histórico */
+        .history-item {
+            transition: all 0.2s ease;
+        }
+        
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animações para feedback */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.5s;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
-        <!-- Cabeçalho -->
-        <header class="mb-8">
+    <!-- Menu Hamburguer para Mobile -->
+    <div id="mobileMenu" class="mobile-menu fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl lg:hidden">
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold text-blue-600">Menu</h2>
+                <button id="closeMobileMenu" class="p-2 text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4">
+            <div class="space-y-2">
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="games">
+                    <i class="fas fa-ticket-alt mr-3"></i> Meus Jogos
+                </button>
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="check">
+                    <i class="fas fa-check-circle mr-3"></i> Conferir
+                </button>
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="history">
+                    <i class="fas fa-history mr-3"></i> Histórico
+                </button>
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="stats">
+                    <i class="fas fa-chart-bar mr-3"></i> Estatísticas
+                </button>
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="finance">
+                    <i class="fas fa-coins mr-3"></i> Financeiro
+                </button>
+                <button class="mobile-tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700" data-tab="simulation">
+                    <i class="fas fa-lightbulb mr-3"></i> Sugestões
+                </button>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t">
+                <h3 class="font-medium text-gray-500 text-sm uppercase mb-3">Ações Rápidas</h3>
+                <button id="mobileAddGame" class="w-full text-left px-3 py-2 rounded-lg bg-blue-50 text-blue-700 mb-2">
+                    <i class="fas fa-plus mr-3"></i> Novo Jogo
+                </button>
+                <button id="mobileCheckGames" class="w-full text-left px-3 py-2 rounded-lg bg-green-50 text-green-700 mb-2">
+                    <i class="fas fa-check mr-3"></i> Conferir Agora
+                </button>
+                <button id="mobileExport" class="w-full text-left px-3 py-2 rounded-lg bg-purple-50 text-purple-700">
+                    <i class="fas fa-download mr-3"></i> Exportar Dados
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Overlay para menu mobile -->
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+    
+    <div class="container mx-auto px-4 py-4 md:py-6 max-w-7xl">
+        <!-- Cabeçalho com menu hamburguer -->
+        <header class="mb-6 md:mb-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-blue-600">Conferidor de Lotofácil</h1>
-                    <p class="text-gray-600 mt-1">Conferência completa de jogos com análises estatísticas</p>
+                <div class="flex items-center w-full md:w-auto">
+                    <button id="openMobileMenu" class="lg:hidden p-2 mr-3 text-gray-600 hover:text-gray-800 touch-target">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-blue-600">Conferidor de Lotofácil</h1>
+                        <p class="text-gray-600 mt-1 mobile-text-sm">Conferência completa de jogos com análises estatísticas</p>
+                    </div>
                 </div>
                 
-                <div class="flex flex-wrap items-center gap-3">
-                    <button id="configBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 transition-colors">
+                <div class="flex flex-wrap items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-normal">
+                    <button id="configBtn" class="px-3 md:px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-2 transition-colors touch-target">
                         <i class="fas fa-cog"></i>
                         <span class="hidden sm:inline">Configurar</span>
                     </button>
                     
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium">Visualização:</span>
-                        <button id="viewToggle" class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2">
+                        <span class="text-sm font-medium hidden md:inline">Visualização:</span>
+                        <button id="viewToggle" class="px-3 py-1.5 md:py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-2 touch-target">
                             <i class="fas fa-th-large"></i>
-                            <span class="hidden sm:inline">Cards</span>
+                            <span class="hidden md:inline">Cards</span>
                         </button>
                     </div>
                     
                     <div class="text-sm bg-blue-50 px-3 py-1.5 rounded-lg">
-                        <span class="font-medium" id="gamesCount">0</span> jogos cadastrados
+                        <span class="font-medium" id="gamesCount">0</span> jogos
                     </div>
                 </div>
             </div>
         </header>
         
-        <!-- Abas principais -->
-        <div class="mb-8 border-b border-gray-200">
+        <!-- Abas principais (ocultas em mobile - substituídas pelo menu) -->
+        <div class="mb-6 md:mb-8 border-b border-gray-200 hidden lg:block">
             <div class="tab-container flex space-x-1 overflow-x-auto">
                 <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors tab-active" data-tab="games">
                     <i class="fas fa-ticket-alt mr-2"></i>Meus Jogos
                 </button>
                 <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="check">
                     <i class="fas fa-check-circle mr-2"></i>Conferir
+                </button>
+                <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="history">
+                    <i class="fas fa-history mr-2"></i>Histórico
                 </button>
                 <button class="tab-item px-4 py-3 font-medium text-gray-600 hover:text-blue-600 transition-colors" data-tab="stats">
                     <i class="fas fa-chart-bar mr-2"></i>Estatísticas
@@ -163,25 +320,34 @@
         <div class="tab-content">
             <!-- Aba: Meus Jogos -->
             <div id="games-tab" class="tab-pane fade-in">
-                <div class="mb-6 flex flex-wrap gap-3">
-                    <button id="addGameBtn" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors">
-                        <i class="fas fa-plus"></i> Criar Novo Jogo
+                <div class="mb-6 flex flex-wrap gap-2 md:gap-3">
+                    <button id="addGameBtn" class="px-3 md:px-4 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors flex-1 md:flex-none btn-touch">
+                        <i class="fas fa-plus"></i> <span class="mobile-text-sm">Novo Jogo</span>
                     </button>
-                    <button id="pasteGamesBtn" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors">
-                        <i class="fas fa-paste"></i> Colar Jogos em Massa
+                    <button id="pasteGamesBtn" class="px-3 md:px-4 py-2 md:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors flex-1 md:flex-none btn-touch">
+                        <i class="fas fa-paste"></i> <span class="mobile-text-sm">Colar Jogos</span>
                     </button>
-                    <button id="randomGameBtn" class="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors">
-                        <i class="fas fa-random"></i> Gerar Jogo Aleatório
+                    <button id="randomGameBtn" class="px-3 md:px-4 py-2 md:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors flex-1 md:flex-none btn-touch">
+                        <i class="fas fa-random"></i> <span class="mobile-text-sm">Aleatório</span>
                     </button>
-                    <button id="clearAllBtn" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors ml-auto">
-                        <i class="fas fa-trash-alt"></i> Limpar Todos
-                    </button>
+                    
+                    <div class="flex gap-2 md:gap-3 ml-auto">
+                        <button id="exportDataBtn" class="px-3 md:px-4 py-2 md:py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2 transition-colors btn-touch">
+                            <i class="fas fa-download"></i> <span class="hidden md:inline">Exportar</span>
+                        </button>
+                        <button id="importDataBtn" class="px-3 md:px-4 py-2 md:py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg flex items-center gap-2 transition-colors btn-touch">
+                            <i class="fas fa-upload"></i> <span class="hidden md:inline">Importar</span>
+                        </button>
+                        <button id="clearAllBtn" class="px-3 md:px-4 py-2 md:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors btn-touch">
+                            <i class="fas fa-trash-alt"></i> <span class="hidden md:inline">Limpar</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Lista de jogos (modo cards) -->
-                <div id="gamesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="gamesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     <!-- Jogos serão renderizados aqui dinamicamente -->
-                    <div class="col-span-full text-center py-10 text-gray-500" id="emptyGamesMessage">
+                    <div class="col-span-full text-center py-8 md:py-10 text-gray-500" id="emptyGamesMessage">
                         <i class="fas fa-ticket-alt text-4xl mb-3"></i>
                         <p class="text-lg">Nenhum jogo cadastrado ainda.</p>
                         <p class="text-sm mt-2">Use os botões acima para adicionar seus jogos da Lotofácil.</p>
@@ -198,23 +364,28 @@
             
             <!-- Aba: Conferir -->
             <div id="check-tab" class="tab-pane hidden fade-in">
-                <div class="bg-white rounded-xl shadow p-6 mb-6">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6 mb-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Inserir Resultado para Conferência</h2>
                     
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-medium mb-2">Números sorteados (1 a 25)</label>
-                        <div class="flex flex-wrap gap-2 mb-4" id="resultNumbersContainer">
+                        <div class="flex flex-wrap gap-2 mb-4 number-grid grid grid-cols-5 sm:grid-cols-10 gap-2" id="resultNumbersContainer">
                             <!-- Números para selecionar o resultado -->
                         </div>
-                        <div class="flex items-center gap-4">
-                            <input type="text" id="resultInput" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                            <button id="checkGamesBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                                Conferir Todos os Jogos
-                            </button>
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <input type="text" id="resultInput" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="flex-1 w-full md:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm">
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <button id="checkGamesBtn" class="px-4 md:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex-1 md:flex-none btn-touch">
+                                    <i class="fas fa-check mr-2"></i> Conferir Jogos
+                                </button>
+                                <button id="saveToHistoryBtn" class="px-4 md:px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex-1 md:flex-none btn-touch">
+                                    <i class="fas fa-save mr-2"></i> Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="border-t pt-6">
+                    <div class="border-t pt-4 md:pt-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Resultado Atual</h3>
                         <div class="flex flex-wrap gap-2" id="currentResultContainer">
                             <span class="text-gray-500">Nenhum resultado inserido ainda.</span>
@@ -222,7 +393,7 @@
                     </div>
                 </div>
                 
-                <div class="mb-4 flex justify-between items-center">
+                <div class="mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                     <h2 class="text-xl font-bold text-gray-800">Resultados da Conferência</h2>
                     <div class="text-sm text-gray-600">
                         <span id="totalGamesChecked">0</span> jogos conferidos
@@ -238,12 +409,38 @@
                 </div>
             </div>
             
+            <!-- Aba: Histórico -->
+            <div id="history-tab" class="tab-pane hidden fade-in">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Histórico de Sorteios</h2>
+                            <p class="text-gray-600 mobile-text-sm mt-1">Registro de todos os sorteios já conferidos</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="clearHistoryBtn" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors btn-touch">
+                                <i class="fas fa-trash-alt"></i> Limpar Histórico
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="historyList" class="space-y-4">
+                        <!-- Histórico será exibido aqui -->
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-history text-4xl mb-3"></i>
+                            <p class="text-lg">Nenhum sorteio no histórico.</p>
+                            <p class="text-sm mt-2">Confera um resultado e clique em "Salvar" para adicionar ao histórico.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Aba: Estatísticas -->
             <div id="stats-tab" class="tab-pane hidden fade-in">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow p-4 md:p-6">
                         <h2 class="text-xl font-bold text-gray-800 mb-4">Frequência de Números</h2>
-                        <div class="h-80" id="frequencyChart">
+                        <div class="h-64 md:h-80" id="frequencyChart">
                             <!-- Gráfico de frequência será renderizado aqui -->
                             <div class="flex items-center justify-center h-full text-gray-500">
                                 <div class="text-center">
@@ -254,9 +451,9 @@
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <h2 class="text-xl font-bold text-gray-800 mb-4">Distribuição de Acertos</h2>
-                        <div class="h-80" id="distributionChart">
+                        <div class="h-64 md:h-80" id="distributionChart">
                             <!-- Gráfico de distribuição será renderizado aqui -->
                             <div class="flex items-center justify-center h-full text-gray-500">
                                 <div class="text-center">
@@ -268,17 +465,17 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow p-6">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Números Mais e Menos Sorteados</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posição</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequência</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentual</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barra</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posição</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequência</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentual</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barra</th>
                                 </tr>
                             </thead>
                             <tbody id="frequencyTable" class="divide-y divide-gray-200">
@@ -296,48 +493,48 @@
             
             <!-- Aba: Financeiro -->
             <div id="finance-tab" class="tab-pane hidden fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-gray-500 text-sm font-medium">Total Investido</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1" id="totalInvested">R$ 0,00</h3>
+                                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mt-1" id="totalInvested">R$ 0,00</h3>
                             </div>
-                            <button id="editInvestedBtn" class="text-blue-600 hover:text-blue-800">
+                            <button id="editInvestedBtn" class="text-blue-600 hover:text-blue-800 touch-target">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="mt-4 text-sm text-gray-600">
+                        <div class="mt-3 md:mt-4 text-xs md:text-sm text-gray-600">
                             <i class="fas fa-info-circle mr-1"></i> Clique no ícone para editar
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <p class="text-gray-500 text-sm font-medium">Total Ganho</p>
-                        <h3 class="text-2xl font-bold text-green-600 mt-1" id="totalWon">R$ 0,00</h3>
+                        <h3 class="text-xl md:text-2xl font-bold text-green-600 mt-1" id="totalWon">R$ 0,00</h3>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <p class="text-gray-500 text-sm font-medium">Lucro/Prejuízo</p>
-                        <h3 class="text-2xl font-bold mt-1" id="profitLoss">R$ 0,00</h3>
+                        <h3 class="text-xl md:text-2xl font-bold mt-1" id="profitLoss">R$ 0,00</h3>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <p class="text-gray-500 text-sm font-medium">ROI</p>
-                        <h3 class="text-2xl font-bold mt-1" id="roiPercent">0%</h3>
+                        <h3 class="text-xl md:text-2xl font-bold mt-1" id="roiPercent">0%</h3>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow p-6">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo por Categoria de Prêmio</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acertos</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Unitário</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acertos</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Unitário</th>
+                                    <th class="px-3 md:px-4 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                                 </tr>
                             </thead>
                             <tbody id="prizesTable" class="divide-y divide-gray-200">
@@ -355,14 +552,14 @@
             
             <!-- Aba: Sugestões -->
             <div id="simulation-tab" class="tab-pane hidden fade-in">
-                <div class="bg-white rounded-xl shadow p-6 mb-6">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6 mb-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Simulação: Melhorar Acertos</h2>
-                    <p class="text-gray-600 mb-6">Esta ferramenta analisa seus jogos e sugere trocas de números para potencialmente aumentar seus acertos com base em estatísticas de frequência.</p>
+                    <p class="text-gray-600 mb-4 md:mb-6 mobile-text-sm">Esta ferramenta analisa seus jogos e sugere trocas de números para potencialmente aumentar seus acertos com base em estatísticas de frequência.</p>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800 mb-3">Números para considerar remover</h3>
-                            <p class="text-gray-600 text-sm mb-4">Estes números aparecem com menos frequência em seus jogos:</p>
+                            <p class="text-gray-600 text-xs md:text-sm mb-4">Estes números aparecem com menos frequência em seus jogos:</p>
                             <div class="flex flex-wrap gap-2" id="numbersToRemove">
                                 <!-- Números para remover serão exibidos aqui -->
                                 <span class="text-gray-500">Adicione jogos para ver sugestões</span>
@@ -371,7 +568,7 @@
                         
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800 mb-3">Números para considerar adicionar</h3>
-                            <p class="text-gray-600 text-sm mb-4">Estes números são menos frequentes em seus jogos, mas são comuns nas estatísticas:</p>
+                            <p class="text-gray-600 text-xs md:text-sm mb-4">Estes números são menos frequentes em seus jogos, mas são comuns nas estatísticas:</p>
                             <div class="flex flex-wrap gap-2" id="numbersToAdd">
                                 <!-- Números para adicionar serão exibidos aqui -->
                                 <span class="text-gray-500">Adicione jogos para ver sugestões</span>
@@ -379,10 +576,10 @@
                         </div>
                     </div>
                     
-                    <div class="mt-8 pt-6 border-t">
+                    <div class="mt-6 md:mt-8 pt-4 md:pt-6 border-t">
                         <h3 class="text-lg font-semibold text-gray-800 mb-3">Sugestão de Troca</h3>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex flex-wrap items-center justify-center gap-4">
+                            <div class="flex flex-col md:flex-row items-center justify-center gap-4">
                                 <div class="text-center">
                                     <div class="font-bold text-gray-800 mb-1">Remover</div>
                                     <div class="flex gap-1" id="suggestedRemove">
@@ -390,8 +587,11 @@
                                     </div>
                                 </div>
                                 
-                                <div class="text-2xl text-gray-500">
+                                <div class="text-2xl text-gray-500 hidden md:block">
                                     <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="text-2xl text-gray-500 md:hidden">
+                                    <i class="fas fa-arrow-down"></i>
                                 </div>
                                 
                                 <div class="text-center">
@@ -403,7 +603,7 @@
                             </div>
                             
                             <div class="mt-4 text-center">
-                                <button id="applySuggestionBtn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+                                <button id="applySuggestionBtn" class="px-4 md:px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors btn-touch">
                                     Aplicar Sugestão a um Jogo
                                 </button>
                             </div>
@@ -411,9 +611,9 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow p-6">
+                <div class="bg-white rounded-xl shadow p-4 md:p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Jogos para Otimização</h2>
-                    <p class="text-gray-600 mb-4">Estes jogos têm números com baixa frequência estatística e podem ser otimizados:</p>
+                    <p class="text-gray-600 mb-4 mobile-text-sm">Estes jogos têm números com baixa frequência estatística e podem ser otimizados:</p>
                     <div id="gamesToOptimize">
                         <!-- Jogos que podem ser otimizados serão listados aqui -->
                         <div class="text-center py-6 text-gray-500">
@@ -428,14 +628,14 @@
     
     <!-- Modal: Criar/Editar Jogo -->
     <div id="gameModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl slide-in">
-            <div class="border-b px-6 py-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col slide-in">
+            <div class="border-b px-4 md:px-6 py-4 flex-shrink-0">
                 <h3 class="text-xl font-bold text-gray-800" id="modalTitle">Criar Novo Jogo</h3>
             </div>
             
-            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto scrollbar-thin">
+            <div class="px-4 md:px-6 py-4 flex-grow overflow-y-auto scrollbar-thin">
                 <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-medium mb-3">Selecione 15 números (1 a 25)</label>
+                    <label class="block text-gray-700 text-sm font-medium mb-3">Selecione <span id="numbersPerGameLabel">15</span> números (1 a 25)</label>
                     <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="numberSelector">
                         <!-- Os números de 1 a 25 serão gerados aqui -->
                     </div>
@@ -449,14 +649,14 @@
                 
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-medium mb-2">Ou cole números separados por vírgula, espaço ou quebra de linha</label>
-                    <textarea id="gameInput" rows="3" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                    <textarea id="gameInput" rows="3" placeholder="Ex: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none mobile-text-sm"></textarea>
                 </div>
                 
                 <div class="flex items-center justify-between mt-2">
                     <div class="text-sm text-gray-600">
                         <span id="validNumbersCount">0</span> números válidos detectados
                     </div>
-                    <div class="w-32">
+                    <div class="w-24 md:w-32">
                         <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div id="progressBar" class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
                         </div>
@@ -464,11 +664,11 @@
                 </div>
             </div>
             
-            <div class="border-t px-6 py-4 flex justify-end gap-3">
-                <button id="cancelModalBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <div class="border-t px-4 md:px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+                <button id="cancelModalBtn" class="px-4 md:px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium btn-touch">
                     Cancelar
                 </button>
-                <button id="saveGameBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <button id="saveGameBtn" class="px-4 md:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors btn-touch">
                     Salvar Jogo
                 </button>
             </div>
@@ -479,24 +679,24 @@
     <div id="pasteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col slide-in">
             <!-- Header fixo -->
-            <div class="border-b px-6 py-4 flex-shrink-0">
+            <div class="border-b px-4 md:px-6 py-4 flex-shrink-0">
                 <h3 class="text-xl font-bold text-gray-800">Colar Jogos em Massa</h3>
                 <p class="text-gray-600 text-sm mt-1">Cole vários jogos de uma vez (um por linha ou separados por vírgula)</p>
             </div>
             
             <!-- Conteúdo scrollável -->
-            <div class="px-6 py-4 flex-grow overflow-y-auto scrollbar-thin">
+            <div class="px-4 md:px-6 py-4 flex-grow overflow-y-auto scrollbar-thin">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-medium mb-2">Cole seus jogos abaixo:</label>
-                    <textarea id="bulkGamesInput" rows="10" placeholder="Exemplo:
+                    <textarea id="bulkGamesInput" rows="8" placeholder="Exemplo:
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 2 3 5 7 11 13 17 19 21 22 23 24 25
-1-4-6-8-10-12-14-16-18-20-22-24-25-3-9" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none font-mono"></textarea>
+1-4-6-8-10-12-14-16-18-20-22-24-25-3-9" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none font-mono mobile-text-sm"></textarea>
                 </div>
                 
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
                     <h4 class="font-medium text-blue-800 mb-2">Formato aceito:</h4>
-                    <ul class="text-sm text-blue-700 list-disc pl-5 space-y-1">
+                    <ul class="text-xs md:text-sm text-blue-700 list-disc pl-4 md:pl-5 space-y-1">
                         <li>Números separados por vírgula: <span class="font-mono">1,2,3,4,5,6,7,8,9,10,11,12,13,14,15</span></li>
                         <li>Números separados por espaço: <span class="font-mono">1 2 3 4 5 6 7 8 9 10 11 12 13 14 15</span></li>
                         <li>Números separados por hífen: <span class="font-mono">1-2-3-4-5-6-7-8-9-10-11-12-13-14-15</span></li>
@@ -506,7 +706,7 @@
                 
                 <div class="mt-6">
                     <h4 class="font-medium text-gray-800 mb-3">Pré-visualização dos jogos detectados:</h4>
-                    <div id="bulkPreview" class="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto scrollbar-thin">
+                    <div id="bulkPreview" class="border border-gray-200 rounded-lg p-3 md:p-4 max-h-48 md:max-h-60 overflow-y-auto scrollbar-thin">
                         <div class="text-gray-500 text-center py-4">Nenhum jogo detectado ainda.</div>
                     </div>
                     <div class="mt-3 text-sm text-gray-600 flex justify-between">
@@ -517,12 +717,12 @@
             </div>
             
             <!-- Footer fixo com botão -->
-            <div class="border-t px-6 py-4 flex-shrink-0">
+            <div class="border-t px-4 md:px-6 py-4 flex-shrink-0">
                 <div class="flex justify-between items-center">
-                    <button id="cancelBulkBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    <button id="cancelBulkBtn" class="px-4 md:px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium btn-touch">
                         Cancelar
                     </button>
-                    <button id="addBulkGamesBtn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <button id="addBulkGamesBtn" class="px-4 md:px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 btn-touch">
                         <i class="fas fa-plus"></i> Adicionar Jogos Válidos
                     </button>
                 </div>
@@ -532,19 +732,19 @@
     
     <!-- Modal: Configurações -->
     <div id="configModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl slide-in">
-            <div class="border-b px-6 py-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] flex flex-col slide-in">
+            <div class="border-b px-4 md:px-6 py-4 flex-shrink-0">
                 <h3 class="text-xl font-bold text-gray-800">Configurações do Conferidor</h3>
             </div>
             
-            <div class="px-6 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin">
+            <div class="px-4 md:px-6 py-4 flex-grow overflow-y-auto scrollbar-thin">
                 <div class="space-y-6">
                     <div>
                         <h4 class="font-medium text-gray-800 mb-3">Configurações do Jogo</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-700 text-sm font-medium mb-2">Quantidade de números por jogo</label>
-                                <select id="configNumbersPerGame" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                                <select id="configNumbersPerGame" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm">
                                     <option value="15">15 números</option>
                                     <option value="16">16 números</option>
                                     <option value="17">17 números</option>
@@ -562,7 +762,7 @@
                             
                             <div>
                                 <label class="block text-gray-700 text-sm font-medium mb-2">Valor de cada jogo (R$)</label>
-                                <input type="number" id="configGameValue" min="0" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="3.00">
+                                <input type="number" id="configGameValue" min="0" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="3.00">
                             </div>
                         </div>
                     </div>
@@ -573,26 +773,54 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-gray-700 text-sm font-medium mb-1">11 acertos</label>
-                                    <input type="number" id="configPrize11" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="5.00">
+                                    <input type="number" id="configPrize11" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="5.00">
                                 </div>
                                 <div>
                                     <label class="block text-gray-700 text-sm font-medium mb-1">12 acertos</label>
-                                    <input type="number" id="configPrize12" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="10.00">
+                                    <input type="number" id="configPrize12" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="10.00">
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-gray-700 text-sm font-medium mb-1">13 acertos</label>
-                                    <input type="number" id="configPrize13" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="25.00">
+                                    <input type="number" id="configPrize13" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="25.00">
                                 </div>
                                 <div>
                                     <label class="block text-gray-700 text-sm font-medium mb-1">14 acertos</label>
-                                    <input type="number" id="configPrize14" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="1500.00">
+                                    <input type="number" id="configPrize14" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="1500.00">
                                 </div>
                                 <div>
                                     <label class="block text-gray-700 text-sm font-medium mb-1">15 acertos</label>
-                                    <input type="number" id="configPrize15" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition" value="2500000.00">
+                                    <input type="number" id="configPrize15" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition mobile-text-sm" value="2500000.00">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-6">
+                        <h4 class="font-medium text-gray-800 mb-3">Exportação/Importação</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Exportar dados</label>
+                                <p class="text-gray-600 text-sm mb-3">Salve todos os seus jogos, configurações e histórico em um arquivo JSON.</p>
+                                <button id="configExportBtn" class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 btn-touch">
+                                    <i class="fas fa-download"></i> Exportar Dados Completos
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Importar dados</label>
+                                <p class="text-gray-600 text-sm mb-3">Restaurar dados de um arquivo JSON exportado anteriormente.</p>
+                                <div class="flex items-center gap-3">
+                                    <input type="file" id="configImportFile" accept=".json" class="hidden">
+                                    <button id="configImportBtn" class="flex-1 px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 btn-touch">
+                                        <i class="fas fa-upload"></i> Selecionar Arquivo
+                                    </button>
+                                    <button id="configImportConfirm" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors hidden">
+                                        Importar
+                                    </button>
+                                </div>
+                                <p id="configImportStatus" class="text-xs mt-2 hidden"></p>
                             </div>
                         </div>
                     </div>
@@ -612,16 +840,20 @@
                                 <input type="checkbox" id="configCompactViewDefault" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <label for="configCompactViewDefault" class="ml-2 text-gray-700 text-sm">Usar visualização compacta por padrão</label>
                             </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="configAutoSaveHistory" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+                                <label for="configAutoSaveHistory" class="ml-2 text-gray-700 text-sm">Salvar automaticamente no histórico ao conferir</label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="border-t px-6 py-4 flex justify-end gap-3">
-                <button id="resetConfigBtn" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <div class="border-t px-4 md:px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+                <button id="resetConfigBtn" class="px-4 md:px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium btn-touch">
                     Redefinir Padrões
                 </button>
-                <button id="saveConfigBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <button id="saveConfigBtn" class="px-4 md:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors btn-touch">
                     Salvar Configurações
                 </button>
             </div>
@@ -669,7 +901,8 @@
             },
             autoCheck: true,
             soundAlert: false,
-            compactViewDefault: false
+            compactViewDefault: false,
+            autoSaveHistory: true
         };
 
         // Estado da aplicação
@@ -680,6 +913,7 @@
             viewMode: 'cards', // 'cards' ou 'compact'
             totalInvested: 0,
             editingGameId: null,
+            history: [], // Novo: histórico de sorteios
             statistics: {
                 frequency: {},
                 distribution: {}
@@ -693,6 +927,7 @@
             updateUI();
             renderGames();
             renderNumberSelectors();
+            updateHistoryDisplay();
         });
 
         // Carregar estado do Local Storage
@@ -702,6 +937,7 @@
             const savedConfig = localStorage.getItem('lotofacil-config');
             const savedViewMode = localStorage.getItem('lotofacil-viewMode');
             const savedInvested = localStorage.getItem('lotofacil-invested');
+            const savedHistory = localStorage.getItem('lotofacil-history'); // Novo
 
             if (savedGames) {
                 state.games = JSON.parse(savedGames);
@@ -722,6 +958,11 @@
             if (savedInvested) {
                 state.totalInvested = parseFloat(savedInvested);
             }
+
+            // Novo: Carregar histórico
+            if (savedHistory) {
+                state.history = JSON.parse(savedHistory);
+            }
         }
 
         // Salvar estado no Local Storage
@@ -731,16 +972,45 @@
             localStorage.setItem('lotofacil-config', JSON.stringify(state.config));
             localStorage.setItem('lotofacil-viewMode', state.viewMode);
             localStorage.setItem('lotofacil-invested', state.totalInvested.toString());
+            localStorage.setItem('lotofacil-history', JSON.stringify(state.history)); // Novo
         }
 
         // Inicializar elementos da UI
         function initializeUI() {
-            // Tabs
+            // Tabs desktop
             document.querySelectorAll('[data-tab]').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     switchTab(tabId);
                 });
+            });
+
+            // Tabs mobile
+            document.querySelectorAll('.mobile-tab-btn').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                    closeMobileMenu();
+                });
+            });
+
+            // Menu mobile
+            document.getElementById('openMobileMenu').addEventListener('click', openMobileMenu);
+            document.getElementById('closeMobileMenu').addEventListener('click', closeMobileMenu);
+            document.getElementById('mobileMenuOverlay').addEventListener('click', closeMobileMenu);
+
+            // Botões mobile
+            document.getElementById('mobileAddGame').addEventListener('click', () => {
+                openGameModal();
+                closeMobileMenu();
+            });
+            document.getElementById('mobileCheckGames').addEventListener('click', () => {
+                switchTab('check');
+                closeMobileMenu();
+            });
+            document.getElementById('mobileExport').addEventListener('click', () => {
+                exportData();
+                closeMobileMenu();
             });
 
             // Botões principais
@@ -751,6 +1021,10 @@
             document.getElementById('configBtn').addEventListener('click', () => openConfigModal());
             document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
             document.getElementById('checkGamesBtn').addEventListener('click', checkAllGames);
+            document.getElementById('saveToHistoryBtn').addEventListener('click', saveToHistory);
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('importDataBtn').addEventListener('click', () => document.getElementById('configImportFile').click());
+            document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
 
             // Modal de jogo
             document.getElementById('cancelModalBtn').addEventListener('click', () => closeGameModal());
@@ -767,6 +1041,10 @@
             document.getElementById('cancelConfigBtn')?.addEventListener('click', () => closeConfigModal());
             document.getElementById('saveConfigBtn').addEventListener('click', saveConfig);
             document.getElementById('resetConfigBtn').addEventListener('click', resetConfig);
+            document.getElementById('configExportBtn').addEventListener('click', exportData);
+            document.getElementById('configImportBtn').addEventListener('click', () => document.getElementById('configImportFile').click());
+            document.getElementById('configImportConfirm').addEventListener('click', importData);
+            document.getElementById('configImportFile').addEventListener('change', handleFileSelect);
 
             // Modal de editar investimento
             document.getElementById('editInvestedBtn').addEventListener('click', () => openEditInvestedModal());
@@ -784,16 +1062,30 @@
                     }
                 });
             });
+
+            // Atualizar label de números por jogo
+            updateNumbersPerGameLabel();
         }
 
         // Alternar entre abas
         function switchTab(tabId) {
-            // Atualizar tabs ativas
+            // Atualizar tabs ativas (desktop)
             document.querySelectorAll('[data-tab]').forEach(tab => {
                 if (tab.getAttribute('data-tab') === tabId) {
                     tab.classList.add('tab-active');
                 } else {
                     tab.classList.remove('tab-active');
+                }
+            });
+
+            // Atualizar tabs ativas (mobile)
+            document.querySelectorAll('.mobile-tab-btn').forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('bg-blue-50', 'text-blue-700');
+                    tab.classList.remove('text-gray-700');
+                } else {
+                    tab.classList.remove('bg-blue-50', 'text-blue-700');
+                    tab.classList.add('text-gray-700');
                 }
             });
 
@@ -818,6 +1110,25 @@
             if (tabId === 'simulation') {
                 updateSuggestions();
             }
+
+            // Atualizar histórico se for a tab de histórico
+            if (tabId === 'history') {
+                updateHistoryDisplay();
+            }
+        }
+
+        // Abrir menu mobile
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('open');
+            document.getElementById('mobileMenuOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fechar menu mobile
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('mobileMenuOverlay').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
         // Alternar modo de visualização
@@ -826,12 +1137,12 @@
             
             if (state.viewMode === 'cards') {
                 state.viewMode = 'compact';
-                toggleBtn.innerHTML = '<i class="fas fa-list"></i><span class="hidden sm:inline">Lista</span>';
+                toggleBtn.innerHTML = '<i class="fas fa-list"></i><span class="hidden md:inline">Lista</span>';
                 document.getElementById('gamesGrid').classList.add('hidden');
                 document.getElementById('gamesList').classList.remove('hidden');
             } else {
                 state.viewMode = 'cards';
-                toggleBtn.innerHTML = '<i class="fas fa-th-large"></i><span class="hidden sm:inline">Cards</span>';
+                toggleBtn.innerHTML = '<i class="fas fa-th-large"></i><span class="hidden md:inline">Cards</span>';
                 document.getElementById('gamesGrid').classList.remove('hidden');
                 document.getElementById('gamesList').classList.add('hidden');
             }
@@ -860,6 +1171,17 @@
             
             // Atualizar resultado atual
             updateCurrentResult();
+            
+            // Atualizar label de números por jogo
+            updateNumbersPerGameLabel();
+        }
+
+        // Atualizar label de números por jogo
+        function updateNumbersPerGameLabel() {
+            const label = document.getElementById('numbersPerGameLabel');
+            if (label) {
+                label.textContent = state.config.numbersPerGame;
+            }
         }
 
         // Renderizar seletores de números
@@ -871,7 +1193,7 @@
             for (let i = 1; i <= 25; i++) {
                 const numberBtn = document.createElement('button');
                 numberBtn.type = 'button';
-                numberBtn.className = 'w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors';
+                numberBtn.className = 'number-btn w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors touch-target';
                 numberBtn.textContent = i;
                 numberBtn.dataset.number = i;
                 
@@ -890,7 +1212,7 @@
             for (let i = 1; i <= 25; i++) {
                 const numberBtn = document.createElement('button');
                 numberBtn.type = 'button';
-                numberBtn.className = 'w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors';
+                numberBtn.className = 'number-btn w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-100 flex items-center justify-center font-medium text-gray-700 hover:bg-gray-200 transition-colors touch-target';
                 numberBtn.textContent = i;
                 numberBtn.dataset.number = i;
                 
@@ -1017,10 +1339,10 @@
                     previewHTML += `
                         <div class="mb-2 p-2 bg-green-50 border border-green-200 rounded">
                             <div class="flex justify-between items-center">
-                                <span class="font-medium text-green-800">Jogo ${index + 1}:</span>
+                                <span class="font-medium text-green-800 text-sm">Jogo ${index + 1}:</span>
                                 <span class="text-xs text-green-600">Válido</span>
                             </div>
-                            <div class="text-sm mt-1">${uniqueNumbers.sort((a, b) => a - b).join(', ')}</div>
+                            <div class="text-xs md:text-sm mt-1">${uniqueNumbers.sort((a, b) => a - b).join(', ')}</div>
                         </div>
                     `;
                 } else {
@@ -1028,10 +1350,10 @@
                     previewHTML += `
                         <div class="mb-2 p-2 bg-red-50 border border-red-200 rounded">
                             <div class="flex justify-between items-center">
-                                <span class="font-medium text-red-800">Jogo ${index + 1}:</span>
+                                <span class="font-medium text-red-800 text-sm">Jogo ${index + 1}:</span>
                                 <span class="text-xs text-red-600">Inválido</span>
                             </div>
-                            <div class="text-sm mt-1">${line || '(vazio)'}</div>
+                            <div class="text-xs md:text-sm mt-1">${line || '(vazio)'}</div>
                             <div class="text-xs text-red-600 mt-1">
                                 ${uniqueNumbers.length} números únicos detectados (esperado: ${state.config.numbersPerGame})
                             </div>
@@ -1241,10 +1563,10 @@
                     checkAllGames();
                 }
                 
-                alert(`${addedCount} jogos adicionados com sucesso!`);
+                showNotification(`${addedCount} jogos adicionados com sucesso!`, 'success');
                 closePasteModal();
             } else {
-                alert('Nenhum jogo válido foi detectado. Verifique o formato e tente novamente.');
+                showNotification('Nenhum jogo válido foi detectado. Verifique o formato e tente novamente.', 'error');
             }
         }
 
@@ -1259,7 +1581,7 @@
             
             if (state.games.length === 0) {
                 gamesGrid.innerHTML = `
-                    <div class="col-span-full text-center py-10 text-gray-500">
+                    <div class="col-span-full text-center py-8 md:py-10 text-gray-500">
                         <i class="fas fa-ticket-alt text-4xl mb-3"></i>
                         <p class="text-lg">Nenhum jogo cadastrado ainda.</p>
                         <p class="text-sm mt-2">Use os botões acima para adicionar seus jogos da Lotofácil.</p>
@@ -1273,19 +1595,19 @@
                 const matchClass = game.checked ? `card-match-${game.matches}` : '';
                 
                 const gameCard = document.createElement('div');
-                gameCard.className = `bg-white rounded-xl shadow border border-gray-200 overflow-hidden ${matchClass}`;
+                gameCard.className = `game-card bg-white rounded-xl shadow border border-gray-200 overflow-hidden ${matchClass}`;
                 gameCard.innerHTML = `
-                    <div class="p-5">
-                        <div class="flex justify-between items-start mb-4">
+                    <div class="p-4 md:p-5">
+                        <div class="flex justify-between items-start mb-3 md:mb-4">
                             <div>
-                                <h4 class="font-bold text-gray-800">Jogo #${game.id.toString().slice(-4)}</h4>
+                                <h4 class="font-bold text-gray-800 mobile-text-sm">Jogo #${game.id.toString().slice(-4)}</h4>
                                 ${game.checked ? `
                                     <div class="mt-1">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${game.matches >= 11 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                        <span class="inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full text-xs font-medium ${game.matches >= 11 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
                                             ${game.matches} acertos
                                         </span>
                                         ${game.prize > 0 ? `
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-1">
+                                            <span class="inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-1">
                                                 R$ ${game.prize.toFixed(2)}
                                             </span>
                                         ` : ''}
@@ -1293,32 +1615,32 @@
                                 ` : ''}
                             </div>
                             <div class="flex gap-1">
-                                <button class="edit-game-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-id="${game.id}">
+                                <button class="edit-game-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors touch-target" data-id="${game.id}">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="delete-game-btn p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" data-id="${game.id}">
+                                <button class="delete-game-btn p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target" data-id="${game.id}">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
                         
-                        <div class="flex flex-wrap gap-1.5 mb-4">
+                        <div class="flex flex-wrap gap-1 md:gap-1.5 mb-3 md:mb-4">
                             ${game.numbers.map(num => `
-                                <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
+                                <span class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
                                     ${num}
                                 </span>
                             `).join('')}
                         </div>
                         
                         ${game.checked ? `
-                            <div class="text-sm text-gray-600">
+                            <div class="text-sm text-gray-600 mobile-text-sm">
                                 ${game.matches >= 11 ? 
                                     `<span class="font-medium text-green-600">Parabéns! Você acertou ${game.matches} números.</span>` : 
                                     `<span>Você acertou ${game.matches} números.</span>`
                                 }
                             </div>
                         ` : `
-                            <div class="text-sm text-gray-500">Aguardando conferência</div>
+                            <div class="text-sm text-gray-500 mobile-text-sm">Aguardando conferência</div>
                         `}
                     </div>
                 `;
@@ -1327,22 +1649,22 @@
                 
                 // Renderizar no modo lista (compacto)
                 const compactGame = document.createElement('div');
-                compactGame.className = 'compact-game-item bg-white rounded-lg shadow border border-gray-200 p-4';
+                compactGame.className = 'compact-game-item bg-white rounded-lg shadow border border-gray-200 p-3 md:p-4';
                 compactGame.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="font-medium text-sm">Jogo #${game.id.toString().slice(-4)}</div>
                         <div class="flex gap-1">
-                            <button class="edit-game-btn p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" data-id="${game.id}">
+                            <button class="edit-game-btn p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors touch-target" data-id="${game.id}">
                                 <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button class="delete-game-btn p-1 text-red-600 hover:bg-red-50 rounded transition-colors" data-id="${game.id}">
+                            <button class="delete-game-btn p-1 text-red-600 hover:bg-red-50 rounded transition-colors touch-target" data-id="${game.id}">
                                 <i class="fas fa-trash-alt text-xs"></i>
                             </button>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-1">
                         ${game.numbers.map(num => `
-                            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
+                            <span class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-medium">
                                 ${num}
                             </span>
                         `).join('')}
@@ -1383,13 +1705,14 @@
                 renderGames();
                 updateUI();
                 updateFinance();
+                showNotification('Jogo excluído com sucesso!', 'info');
             }
         }
 
         // Limpar todos os jogos
         function clearAllGames() {
             if (state.games.length === 0) {
-                alert('Não há jogos para limpar.');
+                showNotification('Não há jogos para limpar.', 'info');
                 return;
             }
             
@@ -1399,6 +1722,7 @@
                 renderGames();
                 updateUI();
                 updateFinance();
+                showNotification('Todos os jogos foram excluídos.', 'info');
             }
         }
 
@@ -1413,7 +1737,7 @@
             
             const sortedResult = [...state.result].sort((a, b) => a - b);
             container.innerHTML = sortedResult.map(num => `
-                <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium text-sm md:text-base">
                     ${num}
                 </span>
             `).join('');
@@ -1423,7 +1747,7 @@
         function checkAllGames() {
             // Verificar se temos resultado completo
             if (state.result.length !== state.config.numbersPerGame) {
-                alert(`Por favor, insira um resultado completo com ${state.config.numbersPerGame} números.`);
+                showNotification(`Por favor, insira um resultado completo com ${state.config.numbersPerGame} números.`, 'warning');
                 return;
             }
             
@@ -1446,10 +1770,17 @@
             // Mostrar resultados da conferência
             showCheckResults();
             
+            // Salvar automaticamente no histórico se configurado
+            if (state.config.autoSaveHistory) {
+                setTimeout(() => saveToHistory(), 500);
+            }
+            
             // Tocar som se configurado e houver prêmio
             if (state.config.soundAlert && state.games.some(g => g.prize > 0)) {
                 playPrizeSound();
             }
+            
+            showNotification('Jogos conferidos com sucesso!', 'success');
         }
 
         // Mostrar resultados da conferência
@@ -1505,8 +1836,8 @@
                 }
                 
                 resultsHTML += `
-                    <div class="${bgColor} border ${borderColor} rounded-xl p-5">
-                        <div class="flex justify-between items-center mb-4">
+                    <div class="${bgColor} border ${borderColor} rounded-xl p-4 md:p-5">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 mb-4">
                             <div>
                                 <h3 class="text-lg font-bold ${textColor}">
                                     ${matchNum} acertos
@@ -1517,7 +1848,7 @@
                                 </p>
                             </div>
                             <div class="text-right">
-                                <div class="text-2xl font-bold ${textColor}">R$ ${totalPrize.toFixed(2)}</div>
+                                <div class="text-xl md:text-2xl font-bold ${textColor}">R$ ${totalPrize.toFixed(2)}</div>
                                 <div class="text-sm ${textColor.replace('800', '600')}">Total</div>
                             </div>
                         </div>
@@ -1533,7 +1864,7 @@
                                     </div>
                                     <div class="flex flex-wrap gap-1">
                                         ${game.numbers.map(num => `
-                                            <span class="w-6 h-6 rounded-full ${state.result.includes(num) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} flex items-center justify-center text-xs font-medium">
+                                            <span class="w-5 h-5 md:w-6 md:h-6 rounded-full ${state.result.includes(num) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} flex items-center justify-center text-xs font-medium">
                                                 ${num}
                                             </span>
                                         `).join('')}
@@ -1546,6 +1877,165 @@
             });
             
             container.innerHTML = resultsHTML;
+        }
+
+        // Salvar no histórico
+        function saveToHistory() {
+            if (state.result.length === 0) {
+                showNotification('Não há resultado para salvar no histórico.', 'warning');
+                return;
+            }
+            
+            if (state.games.length === 0) {
+                showNotification('Não há jogos para salvar no histórico.', 'warning');
+                return;
+            }
+            
+            // Calcular estatísticas do sorteio
+            const matchesCount = {};
+            let totalPrize = 0;
+            
+            state.games.forEach(game => {
+                if (game.checked) {
+                    if (!matchesCount[game.matches]) {
+                        matchesCount[game.matches] = 0;
+                    }
+                    matchesCount[game.matches]++;
+                    totalPrize += game.prize;
+                }
+            });
+            
+            // Criar entrada no histórico
+            const historyEntry = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                result: [...state.result].sort((a, b) => a - b),
+                gamesCount: state.games.length,
+                matchesCount: matchesCount,
+                totalPrize: totalPrize,
+                checkedGames: state.games.filter(g => g.checked).length
+            };
+            
+            // Adicionar ao início do histórico
+            state.history.unshift(historyEntry);
+            
+            // Limitar histórico aos últimos 50 sorteios
+            if (state.history.length > 50) {
+                state.history = state.history.slice(0, 50);
+            }
+            
+            saveState();
+            updateHistoryDisplay();
+            
+            showNotification('Sorteio salvo no histórico!', 'success');
+        }
+
+        // Atualizar exibição do histórico
+        function updateHistoryDisplay() {
+            const container = document.getElementById('historyList');
+            
+            if (state.history.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-history text-4xl mb-3"></i>
+                        <p class="text-lg">Nenhum sorteio no histórico.</p>
+                        <p class="text-sm mt-2">Confera um resultado e clique em "Salvar" para adicionar ao histórico.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let historyHTML = '';
+            
+            state.history.forEach(entry => {
+                const date = new Date(entry.date);
+                const dateStr = date.toLocaleDateString('pt-BR');
+                const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
+                // Calcular acertos por categoria
+                let matchesSummary = '';
+                for (let i = 15; i >= 11; i--) {
+                    if (entry.matchesCount[i]) {
+                        matchesSummary += `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1">${i}: ${entry.matchesCount[i]}</span>`;
+                    }
+                }
+                
+                // Se não houver acertos de 11 a 15
+                if (!matchesSummary) {
+                    matchesSummary = '<span class="text-gray-500 text-sm">Nenhum acerto de 11 a 15</span>';
+                }
+                
+                historyHTML += `
+                    <div class="history-item bg-white border border-gray-200 rounded-xl p-4 md:p-5">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="text-lg font-bold text-gray-800">Sorteio #${entry.id.toString().slice(-6)}</h3>
+                                    <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">${dateStr} ${timeStr}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    ${entry.result.map(num => `
+                                        <span class="w-7 h-7 rounded-full bg-green-100 text-green-800 border border-green-300 flex items-center justify-center text-sm font-medium">
+                                            ${num}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl md:text-2xl font-bold ${entry.totalPrize > 0 ? 'text-green-600' : 'text-gray-600'}">R$ ${entry.totalPrize.toFixed(2)}</div>
+                                <div class="text-sm text-gray-600">${entry.checkedGames} jogos conferidos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                                <div>
+                                    <div class="text-sm text-gray-600 mb-2">Distribuição de acertos:</div>
+                                    <div>${matchesSummary}</div>
+                                </div>
+                                <button class="delete-history-btn px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors mt-2 md:mt-0" data-id="${entry.id}">
+                                    <i class="fas fa-trash-alt mr-1"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = historyHTML;
+            
+            // Adicionar event listeners para excluir do histórico
+            document.querySelectorAll('.delete-history-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const entryId = parseInt(this.getAttribute('data-id'));
+                    deleteHistoryEntry(entryId);
+                });
+            });
+        }
+
+        // Excluir entrada do histórico
+        function deleteHistoryEntry(entryId) {
+            if (confirm('Tem certeza que deseja excluir este sorteio do histórico?')) {
+                state.history = state.history.filter(entry => entry.id !== entryId);
+                saveState();
+                updateHistoryDisplay();
+                showNotification('Sorteio excluído do histórico!', 'info');
+            }
+        }
+
+        // Limpar todo o histórico
+        function clearHistory() {
+            if (state.history.length === 0) {
+                showNotification('O histórico já está vazio.', 'info');
+                return;
+            }
+            
+            if (confirm(`Tem certeza que deseja excluir todos os ${state.history.length} sorteios do histórico? Esta ação não pode ser desfeita.`)) {
+                state.history = [];
+                saveState();
+                updateHistoryDisplay();
+                showNotification('Histórico limpo com sucesso!', 'info');
+            }
         }
 
         // Tocar som de prêmio
@@ -1644,15 +2134,15 @@
                 
                 tableHTML += `
                     <tr class="${rowColor}">
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}º</td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-medium">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}º</td>
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
+                            <span class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-medium">
                                 ${item.num}
                             </span>
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${item.count}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
-                        <td class="px-4 py-3 whitespace-nowrap">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm text-gray-900">${item.count}</td>
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm text-gray-900">${percentage}%</td>
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap">
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                 <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentage}%"></div>
                             </div>
@@ -1703,7 +2193,7 @@
             const maxFreq = Math.max(...freqArray.map(item => item.count));
             
             freqArray.forEach(item => {
-                const height = maxFreq > 0 ? (item.count / maxFreq) * 80 : 0;
+                const height = maxFreq > 0 ? (item.count / maxFreq) * 70 : 0;
                 freqHTML += `
                     <div class="flex-1 flex flex-col items-center">
                         <div class="w-full bg-blue-500 rounded-t" style="height: ${height}%"></div>
@@ -1741,7 +2231,7 @@
             let distHTML = '<div class="flex flex-col items-center justify-center h-full">';
             
             // Simular gráfico de pizza com divs circulares
-            distHTML += '<div class="relative w-48 h-48 rounded-full mb-4">';
+            distHTML += '<div class="relative w-40 h-40 md:w-48 md:h-48 rounded-full mb-4">';
             
             let cumulativeAngle = 0;
             const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#eff6ff'];
@@ -1765,7 +2255,7 @@
                 cumulativeAngle += angle;
             });
             
-            distHTML += '<div class="absolute inset-8 bg-white rounded-full"></div>';
+            distHTML += '<div class="absolute inset-8 md:inset-10 bg-white rounded-full"></div>';
             distHTML += '</div>';
             
             // Legenda
@@ -1803,6 +2293,7 @@
             document.getElementById('configAutoCheck').checked = state.config.autoCheck;
             document.getElementById('configSoundAlert').checked = state.config.soundAlert;
             document.getElementById('configCompactViewDefault').checked = state.config.compactViewDefault;
+            document.getElementById('configAutoSaveHistory').checked = state.config.autoSaveHistory;
             
             modal.classList.remove('hidden');
         }
@@ -1810,6 +2301,9 @@
         // Fechar modal de configuração
         function closeConfigModal() {
             document.getElementById('configModal').classList.add('hidden');
+            // Resetar status de importação
+            document.getElementById('configImportConfirm').classList.add('hidden');
+            document.getElementById('configImportStatus').classList.add('hidden');
         }
 
         // Salvar configuração
@@ -1820,7 +2314,7 @@
             
             // Validar números por jogo
             if (numbersPerGame < 15 || numbersPerGame > 25) {
-                alert('A quantidade de números por jogo deve estar entre 15 e 25.');
+                showNotification('A quantidade de números por jogo deve estar entre 15 e 25.', 'error');
                 return;
             }
             
@@ -1835,6 +2329,7 @@
             state.config.autoCheck = document.getElementById('configAutoCheck').checked;
             state.config.soundAlert = document.getElementById('configSoundAlert').checked;
             state.config.compactViewDefault = document.getElementById('configCompactViewDefault').checked;
+            state.config.autoSaveHistory = document.getElementById('configAutoSaveHistory').checked;
             
             // Limpar resultado atual se a quantidade de números mudou
             if (state.result.length !== numbersPerGame) {
@@ -1848,11 +2343,12 @@
             
             // Recriar seletores de números com nova configuração
             renderNumberSelectors();
+            updateNumbersPerGameLabel();
             
             // Atualizar interface
             updateUI();
             
-            alert('Configurações salvas com sucesso!');
+            showNotification('Configurações salvas com sucesso!', 'success');
         }
 
         // Redefinir configuração padrão
@@ -1861,7 +2357,7 @@
                 state.config = {...DEFAULT_CONFIG};
                 saveState();
                 openConfigModal(); // Reabrir modal para mostrar valores padrão
-                alert('Configurações redefinidas para os valores padrão.');
+                showNotification('Configurações redefinidas para os valores padrão.', 'info');
             }
         }
 
@@ -1924,16 +2420,16 @@
                 const data = prizesByMatch[i];
                 tableHTML += `
                     <tr>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                             ${i} acertos
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm text-gray-900">
                             ${data.count}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm text-gray-900">
                             R$ ${state.config.prizes[i] ? state.config.prizes[i].toFixed(2) : '0,00'}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${data.total > 0 ? 'text-green-600' : 'text-gray-900'}">
+                        <td class="px-3 md:px-4 py-2 md:py-3 whitespace-nowrap text-sm font-medium ${data.total > 0 ? 'text-green-600' : 'text-gray-900'}">
                             R$ ${data.total.toFixed(2)}
                         </td>
                     </tr>
@@ -1970,7 +2466,7 @@
             const value = parseFloat(document.getElementById('editInvestedInput').value);
             
             if (isNaN(value) || value < 0) {
-                alert('Por favor, insira um valor válido (maior ou igual a zero).');
+                showNotification('Por favor, insira um valor válido (maior ou igual a zero).', 'error');
                 return;
             }
             
@@ -1979,7 +2475,7 @@
             updateFinance();
             closeEditInvestedModal();
             
-            alert('Valor investido atualizado com sucesso!');
+            showNotification('Valor investido atualizado com sucesso!', 'success');
         }
 
         // Atualizar sugestões
@@ -2026,7 +2522,7 @@
                 removeContainer.innerHTML = '<span class="text-gray-500">Adicione jogos para ver sugestões</span>';
             } else {
                 removeContainer.innerHTML = toRemove.map(num => `
-                    <span class="w-10 h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium">
+                    <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium text-sm md:text-base">
                         ${num}
                     </span>
                 `).join('');
@@ -2038,7 +2534,7 @@
                 addContainer.innerHTML = '<span class="text-gray-500">Adicione jogos para ver sugestões</span>';
             } else {
                 addContainer.innerHTML = toAdd.map(num => `
-                    <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                    <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium text-sm md:text-base">
                         ${num}
                     </span>
                 `).join('');
@@ -2051,13 +2547,13 @@
             if (toRemove.length >= 2 && toAdd.length >= 2) {
                 // Sugerir trocar 2 números
                 suggestedRemove.innerHTML = toRemove.slice(0, 2).map(num => `
-                    <span class="w-10 h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium">
+                    <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center font-medium text-sm md:text-base">
                         ${num}
                     </span>
                 `).join('');
                 
                 suggestedAdd.innerHTML = toAdd.slice(0, 2).map(num => `
-                    <span class="w-10 h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium">
+                    <span class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-100 text-green-800 border-2 border-green-300 flex items-center justify-center font-medium text-sm md:text-base">
                         ${num}
                     </span>
                 `).join('');
@@ -2119,13 +2615,13 @@
                         
                         <div class="flex flex-wrap gap-1.5 mb-3">
                             ${game.numbers.map(num => `
-                                <span class="w-8 h-8 rounded-full ${leastFrequent.includes(num) ? 'bg-red-100 text-red-800 border-2 border-red-300' : 'bg-blue-100 text-blue-800'} flex items-center justify-center text-sm font-medium">
+                                <span class="w-7 h-7 md:w-8 md:h-8 rounded-full ${leastFrequent.includes(num) ? 'bg-red-100 text-red-800 border-2 border-red-300' : 'bg-blue-100 text-blue-800'} flex items-center justify-center text-sm font-medium">
                                     ${num}
                                 </span>
                             `).join('')}
                         </div>
                         
-                        <button class="optimize-game-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors w-full" data-id="${game.id}">
+                        <button class="optimize-game-btn w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors btn-touch" data-id="${game.id}">
                             Otimizar Este Jogo
                         </button>
                     </div>
@@ -2148,7 +2644,7 @@
         function applySuggestion() {
             // Verificar se há jogos
             if (state.games.length === 0) {
-                alert('Não há jogos para aplicar sugestões. Adicione alguns jogos primeiro.');
+                showNotification('Não há jogos para aplicar sugestões. Adicione alguns jogos primeiro.', 'warning');
                 return;
             }
             
@@ -2159,12 +2655,163 @@
             });
             
             if (!gameToOptimize) {
-                alert('Todos os jogos já estão otimizados ou têm bons resultados. Tente adicionar mais jogos.');
+                showNotification('Todos os jogos já estão otimizados ou têm bons resultados. Tente adicionar mais jogos.', 'info');
                 return;
             }
             
             // Abrir modal de edição para este jogo
             openGameModal(gameToOptimize.id);
+        }
+
+        // Exportar dados
+        function exportData() {
+            const data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                games: state.games,
+                result: state.result,
+                config: state.config,
+                totalInvested: state.totalInvested,
+                history: state.history,
+                viewMode: state.viewMode
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `conferidor-lotofacil-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Dados exportados com sucesso!', 'success');
+        }
+
+        // Manipular seleção de arquivo
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Validar estrutura básica
+                    if (!data.games || !data.config) {
+                        showNotification('Arquivo inválido: estrutura incorreta.', 'error');
+                        return;
+                    }
+                    
+                    // Mostrar preview
+                    const importStatus = document.getElementById('configImportStatus');
+                    importStatus.textContent = `Arquivo válido: ${data.games.length} jogos, ${data.history ? data.history.length : 0} sorteios no histórico.`;
+                    importStatus.className = 'text-xs mt-2 text-green-600';
+                    importStatus.classList.remove('hidden');
+                    
+                    // Mostrar botão de confirmação
+                    document.getElementById('configImportConfirm').classList.remove('hidden');
+                    document.getElementById('configImportConfirm').dataset.fileData = e.target.result;
+                    
+                } catch (error) {
+                    showNotification('Erro ao ler arquivo: formato inválido.', 'error');
+                    console.error(error);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Importar dados
+        function importData() {
+            const fileData = document.getElementById('configImportConfirm').dataset.fileData;
+            
+            if (!fileData) {
+                showNotification('Nenhum arquivo selecionado.', 'error');
+                return;
+            }
+            
+            if (confirm('Tem certeza que deseja importar os dados? Isso substituirá todos os dados atuais.')) {
+                try {
+                    const data = JSON.parse(fileData);
+                    
+                    // Atualizar estado
+                    state.games = data.games || [];
+                    state.result = data.result || [];
+                    state.config = {...DEFAULT_CONFIG, ...data.config};
+                    state.totalInvested = data.totalInvested || 0;
+                    state.history = data.history || [];
+                    state.viewMode = data.viewMode || 'cards';
+                    
+                    // Salvar
+                    saveState();
+                    
+                    // Atualizar UI
+                    renderNumberSelectors();
+                    renderGames();
+                    updateUI();
+                    updateFinance();
+                    updateHistoryDisplay();
+                    updateNumbersPerGameLabel();
+                    
+                    // Resetar importação
+                    document.getElementById('configImportFile').value = '';
+                    document.getElementById('configImportConfirm').classList.add('hidden');
+                    document.getElementById('configImportStatus').classList.add('hidden');
+                    
+                    showNotification('Dados importados com sucesso!', 'success');
+                    
+                } catch (error) {
+                    showNotification('Erro ao importar dados: arquivo corrompido.', 'error');
+                    console.error(error);
+                }
+            }
+        }
+
+        // Mostrar notificação
+        function showNotification(message, type = 'info') {
+            // Criar elemento de notificação
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg max-w-sm transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+                type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+                type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                'bg-blue-100 text-blue-800 border border-blue-200'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        'fa-info-circle'
+                    } mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 10);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('translate-x-0');
+                notification.classList.add('translate-x-full');
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
     </script>
 </body>
